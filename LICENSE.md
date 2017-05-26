@@ -1,8 +1,4 @@
-Microsoft Cognitive Services Samples
-
-Copyright (c) Microsoft Corporation
-
-All rights reserved.
+Welcome Kiosk
 
 MIT License
 

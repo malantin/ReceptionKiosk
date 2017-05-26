@@ -24,19 +24,14 @@
 
         <ScrollViewer Grid.Row="1" EntranceNavigationTransitionInfo.IsTargetElement="True">
             <StackPanel Margin="12">
-                <TextBlock Style="{ThemeResource BodyTextBlockStyle}">Welcome to the Intelligent Kiosk Sample! Here you will find several demos showcasing 
-                    workflows and experiences built on top of the Microsoft Cognitive Services. 
+                <TextBlock Style="{ThemeResource BodyTextBlockStyle}">This application is a welcome Kiosk to greet known office visitors.
                 </TextBlock>
 
-                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Margin="0,12">The kiosk is an example of an intelligent application, one that can understand human faces and predict their age, gender and emotion. It can do so from live
-                    images from a web cam, Bing Images or local photos. It also allows you to very quickly create and train a model to perform face identification against any pre-determined set of faces.
+                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Margin="0,12">Add some faces to start.
                 </TextBlock>
 
                 <Image Stretch="Uniform" Source="ms-appx:///Assets/oxford-face.png" MaxWidth="350" HorizontalAlignment="Center" Margin="0,12,0,0" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock VerticalAlignment="Center">For more information visit</TextBlock>
-                    <HyperlinkButton Margin="4,0,0,0" Content="Microsoft Cognitive Services" NavigateUri="https://www.microsoft.com/cognitive-services"/>
-                </StackPanel>
+
             </StackPanel>
         </ScrollViewer>
 

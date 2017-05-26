@@ -84,9 +84,5 @@ namespace IntelligentKioskSample.Views
             }
         }
 
-        private void ResetMallKioskSettingsButtonClick(object sender, RoutedEventArgs e)
-        {
-            SettingsHelper.Instance.RestoreMallKioskSettingsToDefaultFile();
-        }
     }
 }

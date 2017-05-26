@@ -35,10 +35,12 @@ using ServiceHelpers;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.UI;
 using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
@@ -236,6 +238,38 @@ namespace IntelligentKioskSample.Views
         private void UpdateCameraHostSize()
         {
             this.cameraHostGrid.Width = this.cameraHostGrid.ActualHeight * (this.cameraControl.CameraAspectRatio != 0 ? this.cameraControl.CameraAspectRatio : 1.777777777777);
+        }
+
+    }
+
+    public class SentimentToColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            double score = (double)value;
+
+            // Linear gradient function, from a red 0x99 when score = 0 to a green 0x77 when score = 1.
+            return new SolidColorBrush(Color.FromArgb(0xff, (byte)(0x99 - (score * 0x99)), (byte)(score * 0x77), 0));
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            // not used
+            return 0.5;
+        }
+    }
+
+    public class WordCountToFontSizeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            return 10 + Math.Min(36, (int)value * 1.5);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            // not used
+            return 0;
         }
     }
 }

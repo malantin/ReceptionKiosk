@@ -73,26 +73,8 @@ namespace IntelligentKioskSample
 
         private async void OnSettingChanged(string propertyName, object value)
         {
-            if (propertyName == "MallKioskDemoCustomSettings")
-            {
-                // save to file as the content is too big to be saved as a string-like setting
-                StorageFile file = await ApplicationData.Current.RoamingFolder.CreateFileAsync(
-                    "MallKioskDemoCustomSettings.xml",
-                    CreationCollisionOption.ReplaceExisting);
-
-                using (Stream stream = await file.OpenStreamForWriteAsync())
-                {
-                    using (StreamWriter writer = new StreamWriter(stream))
-                    {
-                        await writer.WriteAsync(value.ToString());
-                    }
-                }
-            }
-            else
-            {
-                ApplicationData.Current.RoamingSettings.Values[propertyName] = value;
-            }
-
+            ApplicationData.Current.RoamingSettings.Values[propertyName] = value;
+            
             instance.OnSettingsChanged();
             instance.OnPropertyChanged(propertyName);
         }
@@ -194,47 +176,6 @@ namespace IntelligentKioskSample
                     this.ShowDebugInfo = booleanValue;
                 }
             }
-
-            value = ApplicationData.Current.RoamingSettings.Values["DriverMonitoringSleepingThreshold"];
-            if (value != null)
-            {
-                double threshold;
-                if (double.TryParse(value.ToString(), out threshold))
-                {
-                    this.DriverMonitoringSleepingThreshold = threshold;
-                }
-            }
-
-            value = ApplicationData.Current.RoamingSettings.Values["DriverMonitoringYawningThreshold"];
-            if (value != null)
-            {
-                double threshold;
-                if (double.TryParse(value.ToString(), out threshold))
-                {
-                    this.DriverMonitoringYawningThreshold = threshold;
-                }
-            }
-
-            // load mall kiosk demo custom settings from file as the content is too big to be saved as a string-like setting
-            try
-            {
-                using (Stream stream = await ApplicationData.Current.RoamingFolder.OpenStreamForReadAsync("MallKioskDemoCustomSettings.xml"))
-                {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        this.MallKioskDemoCustomSettings = await reader.ReadToEndAsync();
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                this.RestoreMallKioskSettingsToDefaultFile();
-            }
-        }
-
-        public void RestoreMallKioskSettingsToDefaultFile()
-        {
-            this.MallKioskDemoCustomSettings = File.ReadAllText("Views\\MallKioskDemoConfig\\MallKioskDemoSettings.xml");
         }
 
         public void RestoreAllSettings()
@@ -330,17 +271,6 @@ namespace IntelligentKioskSample
             }
         }
 
-        private string mallKioskDemoCustomSettings = string.Empty;
-        public string MallKioskDemoCustomSettings
-        {
-            get { return this.mallKioskDemoCustomSettings; }
-            set
-            {
-                this.mallKioskDemoCustomSettings = value;
-                this.OnSettingChanged("MallKioskDemoCustomSettings", value);
-            }
-        }
-
         private string textAnalyticsKey = string.Empty;
         public string TextAnalyticsKey
         {
@@ -382,28 +312,6 @@ namespace IntelligentKioskSample
             {
                 this.showDebugInfo = value;
                 this.OnSettingChanged("ShowDebugInfo", value);
-            }
-        }
-
-        private double driverMonitoringSleepingThreshold = RealtimeDriverMonitoring.DefaultSleepingApertureThreshold;
-        public double DriverMonitoringSleepingThreshold
-        {
-            get { return this.driverMonitoringSleepingThreshold; }
-            set
-            {
-                this.driverMonitoringSleepingThreshold = value;
-                this.OnSettingChanged("DriverMonitoringSleepingThreshold", value);
-            }
-        }
-
-        private double driverMonitoringYawningThreshold = RealtimeDriverMonitoring.DefaultYawningApertureThreshold;
-        public double DriverMonitoringYawningThreshold
-        {
-            get { return this.driverMonitoringYawningThreshold; }
-            set
-            {
-                this.driverMonitoringYawningThreshold = value;
-                this.OnSettingChanged("DriverMonitoringYawningThreshold", value);
             }
         }
 

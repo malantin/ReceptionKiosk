@@ -184,11 +184,6 @@ namespace IntelligentKioskSample
             //Save application state and stop any background activity
             var currentView = (Window.Current.Content as AppShell)?.AppFrame?.Content;
 
-            if (currentView != null && currentView.GetType() == typeof(RealTimeDemo))
-            {
-                await (currentView as RealTimeDemo).HandleApplicationShutdownAsync();
-            }
-
             deferral.Complete();
         }
     }

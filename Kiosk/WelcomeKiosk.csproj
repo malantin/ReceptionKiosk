@@ -3,11 +3,11 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <ProjectGuid>{CAAE976C-E77D-48D0-85B7-DAFF0D677EF5}</ProjectGuid>
+    <ProjectGuid>{B08D337A-AF9F-4705-B8C1-C7F07FACD8C5}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>IntelligentKioskSample</RootNamespace>
-    <AssemblyName>RaspberryPiIntelligentKioskSample</AssemblyName>
+    <AssemblyName>WelcomeKiosk</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10240.0</TargetPlatformVersion>
@@ -109,11 +109,14 @@
     <Compile Include="Controls\EmotionToColoredBar.xaml.cs">
       <DependentUpon>EmotionToColoredBar.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\OverallStatsControl.xaml.cs">
-      <DependentUpon>OverallStatsControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\SentimentControl.xaml.cs">
       <DependentUpon>SentimentControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SentimentDistributionControl.xaml.cs">
+      <DependentUpon>SentimentDistributionControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SpeechToTextControl.xaml.cs">
+      <DependentUpon>SpeechToTextControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\VerticalBarWithValueControl.xaml.cs">
       <DependentUpon>VerticalBarWithValueControl.xaml</DependentUpon>
@@ -124,11 +127,11 @@
     <Compile Include="Controls\EmotionResponseStackBarControl.xaml.cs">
       <DependentUpon>EmotionResponseStackBarControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\AgeGenderDistributionControl.xaml.cs">
-      <DependentUpon>AgeGenderDistributionControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\EmotionEmojiControl.xaml.cs">
       <DependentUpon>EmotionEmojiControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VideoTrack.xaml.cs">
+      <DependentUpon>VideoTrack.xaml</DependentUpon>
     </Compile>
     <Compile Include="KioskExperiences.cs" />
     <Compile Include="Controls\CameraControl.xaml.cs">
@@ -151,24 +154,22 @@
       <DependentUpon>PageHeader.xaml</DependentUpon>
     </Compile>
     <Compile Include="NavMenuItem.cs" />
-    <Compile Include="SenseHat\SenseHatInputManager.cs" />
-    <Compile Include="SenseHat\SingleColorScrollText.cs" />
     <Compile Include="SettingsHelper.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="Views\AutomaticPhotoCapturePage.xaml.cs">
+      <DependentUpon>AutomaticPhotoCapturePage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\DemoLauncherPage.xaml.cs">
       <DependentUpon>DemoLauncherPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\EmotionMeter.xaml.cs">
-      <DependentUpon>EmotionMeter.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\GreetingKiosk.xaml.cs">
       <DependentUpon>GreetingKiosk.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\RealTimeDemo.xaml.cs">
-      <DependentUpon>RealTimeDemo.xaml</DependentUpon>
+    <Compile Include="Views\PersonDetailsPage.xaml.cs">
+      <DependentUpon>PersonDetailsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\RealtimeDriverMonitoring.xaml.cs">
-      <DependentUpon>RealtimeDriverMonitoring.xaml</DependentUpon>
+    <Compile Include="Views\RecognitionPage.xaml.cs">
+      <DependentUpon>RecognitionPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
@@ -176,7 +177,19 @@
     <Compile Include="AppShell.xaml.cs">
       <DependentUpon>AppShell.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PersonGroupDetailsPage.xaml.cs">
+      <DependentUpon>PersonGroupDetailsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PersonGroupsPage.xaml.cs">
+      <DependentUpon>PersonGroupsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LandingPage.xaml.cs">
+      <DependentUpon>LandingPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Controls\ImageSearchUserControl.xaml.cs">
+      <DependentUpon>ImageSearchUserControl.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -184,10 +197,19 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\EMeter.jpg" />
+    <Content Include="Assets\BingNewsAnalytics.png" />
+    <Content Include="Assets\camera.png" />
+    <Content Include="Assets\female.png" />
     <Content Include="Assets\GreetingKiosk.JPG" />
+    <Content Include="Assets\male_blue.png" />
+    <Content Include="Assets\EmotionRecognition.PNG" />
+    <Content Include="Assets\FaceAPI.PNG" />
+    <Content Include="Assets\male.png" />
+    <Content Include="Assets\Mall.png" />
+    <Content Include="Assets\oxford-face.png" />
     <Content Include="Assets\RealTime.PNG" />
     <Content Include="Assets\RealtimeDriverMonitoring.jpg" />
+    <Content Include="Assets\RealTimeFromVideo.PNG" />
     <Content Include="Assets\smalltile-sdk.png" />
     <Content Include="Assets\splash-sdk.png" />
     <Content Include="Assets\StoreLogo.png" />
@@ -207,15 +229,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\OverallStatsControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Controls\CameraControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\SentimentControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\SentimentDistributionControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\SpeechToTextControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -228,10 +254,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\EmotionResponseStackBarControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Controls\AgeGenderDistributionControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -259,16 +281,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Controls\VideoTrack.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Styles\Styles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Page>
-    <Page Include="Views\DemoLauncherPage.xaml">
+    <Page Include="Views\AutomaticPhotoCapturePage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\EmotionMeter.xaml">
+    <Page Include="Views\DemoLauncherPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -276,11 +302,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\RealTimeDemo.xaml">
+    <Page Include="Views\PersonDetailsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\RealtimeDriverMonitoring.xaml">
+    <Page Include="Views\RecognitionPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -292,9 +318,29 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\PersonGroupDetailsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PersonGroupsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LandingPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\ImageSearchUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Kiosk\ServiceHelpers\ServiceHelpers.csproj">
+    <ProjectReference Include="KioskRuntimeComponent\KioskRuntimeComponent.csproj">
+      <Project>{fc5a0250-b742-40a8-82ca-bec2df66982f}</Project>
+      <Name>KioskRuntimeComponent</Name>
+    </ProjectReference>
+    <ProjectReference Include="ServiceHelpers\ServiceHelpers.csproj">
       <Project>{5d9320af-a9e4-48e3-89bc-9f7f0954b298}</Project>
       <Name>ServiceHelpers</Name>
     </ProjectReference>

@@ -68,7 +68,7 @@ namespace IntelligentKioskSample
                 new NavMenuItem()
                 {
                     Symbol = Symbol.Favorite,
-                    Label = "Demos",
+                    Label = "Kiosk Modes",
                     DestPage = typeof(DemoLauncherPage)
                 },
 
