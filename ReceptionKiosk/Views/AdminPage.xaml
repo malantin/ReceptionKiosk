@@ -25,6 +25,19 @@
             Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
             <!--The SystemControlPageBackgroundChromeLowBrush background represents where you should place your content. 
                 Place your content here.-->
+
+            <ScrollViewer Grid.Row="1">
+                <StackPanel Orientation="Vertical" Margin="12,12" >
+                    <TextBlock Text="API Keys" Style="{StaticResource SubheaderTextBlockStyle}"/>
+                    <TextBox Header="Face API Key" Text="{x:Bind ViewModel.ApiSettingService.FaceApiKey, Mode=TwoWay}" VerticalAlignment="Top" />
+                    <PasswordBox Header="Face API Key" Password="{x:Bind ViewModel.ApiSettingService.FaceApiKey, Mode=TwoWay}" VerticalAlignment="Top" />
+
+                    <PasswordBox Header="Bing Search API Key" Margin="0,10,0,0" Password="{x:Bind ViewModel.ApiSettingService.BingSearchApiKey, Mode=TwoWay}" />
+
+                    <PasswordBox Header="LinkedIn API Key" Password="{x:Bind ViewModel.ApiSettingService.LinkedInApiKey, Mode=TwoWay}" Margin="0,10,0,0" />
+                </StackPanel>
+            </ScrollViewer>
+            
         </Grid>
     
         <!--  Adaptive triggers  -->
