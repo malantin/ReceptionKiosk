@@ -9,16 +9,15 @@ namespace ReceptionKiosk.ViewModels
         public AdminViewModel()
         {
             _apiSettingService = new APISettingsService();
-            _apiSettingService.LoadAPIKeysFromSettingsAsync();
         }
 
         private APISettingsService _apiSettingService;
 
         public APISettingsService ApiSettingService { get => _apiSettingService; set => _apiSettingService = value; }
 
-        public void Initialize()
+        public async void Initialize()
         {
-
+            await ApiSettingService.LoadAPIKeysFromSettingsAsync();
         }
 
     }

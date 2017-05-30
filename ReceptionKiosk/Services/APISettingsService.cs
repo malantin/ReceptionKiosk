@@ -15,8 +15,6 @@ namespace ReceptionKiosk.Services
 
         public APISettingsService()
         {
-            LoadAPIKeysFromSettingsAsync();
-            //FaceApiKey = "djfklsdjflkjsdflke";
         }
 
         public string FaceApiKey
@@ -24,9 +22,8 @@ namespace ReceptionKiosk.Services
             get { return _faceApiKey; }
             set
             {
-                _faceApiKey = value;
-                SaveAPIKeysInSettingsAsync("FaceApiKey", _faceApiKey);
                 Set(ref _faceApiKey, value);
+                SaveAPIKeysInSettingsAsync("FaceApiKey", _faceApiKey);                
             }
         }
 
@@ -35,9 +32,8 @@ namespace ReceptionKiosk.Services
             get { return _bingSearchApiKey; }
             set
             {
-                _bingSearchApiKey = value;
-                SaveAPIKeysInSettingsAsync("BingSearchApiKey", _bingSearchApiKey);
-                Set(ref _faceApiKey, value);
+                Set(ref _bingSearchApiKey, value);
+                SaveAPIKeysInSettingsAsync("BingSearchApiKey", _bingSearchApiKey);                
             }
         }
 
@@ -46,20 +42,19 @@ namespace ReceptionKiosk.Services
             get { return _linkedInApiKey; }
             set
             {
-                _linkedInApiKey = value;
-                SaveAPIKeysInSettingsAsync("LinkedInApiKey", _linkedInApiKey);
-                Set(ref _faceApiKey, value);
+                Set(ref _linkedInApiKey, value);
+                SaveAPIKeysInSettingsAsync("LinkedInApiKey", _linkedInApiKey);                
             }
         }
 
-        public async void LoadAPIKeysFromSettingsAsync()
+        public async Task LoadAPIKeysFromSettingsAsync()
         {
-            BingSearchApiKey = await ApplicationData.Current.LocalSettings.ReadAsync<string>("BingSearchApiKey");
             FaceApiKey = await ApplicationData.Current.LocalSettings.ReadAsync<string>("FaceApiKey");
+            BingSearchApiKey = await ApplicationData.Current.LocalSettings.ReadAsync<string>("BingSearchApiKey");
             LinkedInApiKey = await ApplicationData.Current.LocalSettings.ReadAsync<string>("LinkedInApiKey");
         }
 
-        private static async Task SaveAPIKeysInSettingsAsync(string SettingsKey, string APIKeyValue)
+        private async void SaveAPIKeysInSettingsAsync(string SettingsKey, string APIKeyValue)
         {
             await ApplicationData.Current.LocalSettings.SaveAsync<string>(SettingsKey, APIKeyValue);
         }
