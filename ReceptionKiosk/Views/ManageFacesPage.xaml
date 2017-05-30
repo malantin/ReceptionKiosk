@@ -14,19 +14,23 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <TextBlock
             x:Name="TitlePage"
             x:Uid="ManageFaces_Title"
             FontSize="28" FontWeight="SemiLight" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" VerticalAlignment="Center"
             Margin="0,0,12,7"/>
 
-        <Grid 
-            Grid.Row="1" 
-            Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
-            <!--The SystemControlPageBackgroundChromeLowBrush background represents where you should place your content. 
-                Place your content here.-->
-        </Grid>
-    
+            <ProgressRing x:Name="progressRing" Height="50" Width="50" IsActive="{x:Bind ViewModel.IsLoading}"/>
+        </StackPanel>
+
+        <StackPanel 
+            Grid.Row="1"
+            Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
+            Orientation="Horizontal">
+            <ListBox x:Name="listBoxGroups" ItemsSource="{x:Bind ViewModel.PersonGroups}" DisplayMemberPath="Name"></ListBox>
+        </StackPanel>
+
         <!--  Adaptive triggers  -->
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="WindowStates">
