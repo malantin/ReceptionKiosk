@@ -111,6 +111,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activation\ActivationHandler.cs" />
+    <Compile Include="Controls\ReceptionCamera.xaml.cs">
+      <DependentUpon>ReceptionCamera.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\IEnumerableExtensions.cs" />
     <Compile Include="Helpers\Json.cs" />
     <Compile Include="Helpers\Observable.cs" />
@@ -229,6 +232,10 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\ReceptionCamera.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AddFacePage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
