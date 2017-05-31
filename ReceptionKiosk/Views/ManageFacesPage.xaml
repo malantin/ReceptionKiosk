@@ -5,15 +5,30 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    <Grid
-        x:Name="ContentArea"
-        Margin="12,0,12,0">
+
+    <Grid x:Name="ContentArea" Margin="12,0,12,0">
 
         <Grid.RowDefinitions>
             <RowDefinition x:Name="TitleRow" Height="48"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- COMMANDBAR -->
+        <CommandBar Grid.Row="0" x:Name="commandBar" VerticalAlignment="Top" HorizontalContentAlignment="Stretch">
+            <AppBarButton Icon="Add" Label="Add Group">
+                <AppBarButton.Flyout>
+                    <Flyout x:Name="addPersonGroupFlyout">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="personGroupNameTextBox" TextWrapping="Wrap" Width="262" PlaceholderText="Enter group name (e.g. Coworkers)"/>
+                            <Button x:Name="button" Content="Add" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,0" />
+                            <Button x:Name="button_Copy" Content="Cancel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                        </StackPanel>
+                    </Flyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+        </CommandBar>
+
+        <!-- Heading -->
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <TextBlock
             x:Name="TitlePage"
@@ -21,15 +36,42 @@
             FontSize="28" FontWeight="SemiLight" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" VerticalAlignment="Center"
             Margin="0,0,12,7"/>
 
-            <ProgressRing x:Name="progressRing" Height="50" Width="50" IsActive="{x:Bind ViewModel.IsLoading}"/>
+            <ProgressRing x:Name="progressRing" Height="50" Width="50" IsActive="{x:Bind ViewModel.IsLoading, Mode=TwoWay}"/>
         </StackPanel>
 
-        <StackPanel 
-            Grid.Row="1"
-            Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
-            Orientation="Horizontal">
-            <ListBox x:Name="listBoxGroups" ItemsSource="{x:Bind ViewModel.PersonGroups}" DisplayMemberPath="Name"></ListBox>
-        </StackPanel>
+        <!-- Content -->
+        <Grid Grid.Row="1" Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="PersonGroups" Width="*" />
+                <ColumnDefinition x:Name="Persons" Width="*" />
+                <ColumnDefinition x:Name="Faces" Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="Header" Height="40" />
+                <RowDefinition x:Name="Content" Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- CONTENT HEADER -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Groups" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="Persons" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="Faces" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+            <!-- SUBCONTENT -->
+            <ListBox Grid.Row="1" Grid.Column="0" x:Name="listBoxPersonGroups" ItemsSource="{x:Bind ViewModel.PersonGroups}" DisplayMemberPath="Name" SelectionChanged="{x:Bind ViewModel.OnPersonGroupChanged}"/>
+            <ListBox Grid.Row="1" Grid.Column="1" x:Name="listBoxPersons" ItemsSource="{x:Bind ViewModel.Persons}" DisplayMemberPath="Name" SelectionChanged="{x:Bind ViewModel.OnPersonChanged}"/>
+            <TextBlock Grid.Row="1" Grid.Column="2" x:Name="countOfFaces" Text="{x:Bind ViewModel.CountOfFaces, Mode=TwoWay}" />
+            <!--<ListView ItemsSource="{x:Bind ViewModel.PersonFaces}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Image 
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>-->
+        </Grid>
 
         <!--  Adaptive triggers  -->
         <VisualStateManager.VisualStateGroups>
