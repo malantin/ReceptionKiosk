@@ -124,11 +124,11 @@ namespace ReceptionKiosk.ViewModels
 
             // More on Segoe UI Symbol icons: https://docs.microsoft.com/windows/uwp/style/segoe-ui-symbol-font
             // Edit String/en-US/Resources.resw: Add a menu item title for each page
-            _primaryItems.Add(ShellNavigationItem.FromType<MainPage>("Shell_Main".GetLocalized(), Symbol.Document));
+            _primaryItems.Add(ShellNavigationItem.FromType<MainPage>("Shell_Main".GetLocalized(), Symbol.Home));
             _secondaryItems.Add(ShellNavigationItem.FromType<SettingsPage>("Shell_Settings".GetLocalized(), Symbol.Setting));
-            _primaryItems.Add(ShellNavigationItem.FromType<AdminPage>("Shell_Admin".GetLocalized(), Symbol.Document));
-            _primaryItems.Add(ShellNavigationItem.FromType<AddFacePage>("Shell_AddFace".GetLocalized(), Symbol.Document));
-            _primaryItems.Add(ShellNavigationItem.FromType<ManageFacesPage>("Shell_ManageFaces".GetLocalized(), Symbol.Document));
+            _primaryItems.Add(ShellNavigationItem.FromType<AdminPage>("Shell_Admin".GetLocalized(), Symbol.Admin));
+            _primaryItems.Add(ShellNavigationItem.FromType<AddFacePage>("Shell_AddFace".GetLocalized(), Symbol.AddFriend));
+            _primaryItems.Add(ShellNavigationItem.FromType<ManageFacesPage>("Shell_ManageFaces".GetLocalized(), Symbol.Manage));
         }
 
         private void ItemSelected(ShellNavigationItem e)
