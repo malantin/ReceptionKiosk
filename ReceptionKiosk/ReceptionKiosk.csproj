@@ -111,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activation\ActivationHandler.cs" />
+    <Compile Include="Controls\Converters.cs" />
     <Compile Include="Controls\ReceptionCamera.xaml.cs">
       <DependentUpon>ReceptionCamera.xaml</DependentUpon>
     </Compile>

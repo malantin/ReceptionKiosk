@@ -22,6 +22,13 @@ namespace ReceptionKiosk.Views
             Application.Current.Suspending += Application_Suspending;
         }
 
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            await ViewModel.Initialize();
+
+            if (groupBox.Items.Count > 0) groupBox.SelectedIndex = 0;
+        }
+
         protected async override void OnNavigatedFrom(NavigationEventArgs e)
         {
             await cameraControl.CleanupCameraAsync();

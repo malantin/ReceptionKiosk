@@ -6,10 +6,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ctl="using:ReceptionKiosk.Controls"
     mc:Ignorable="d">
+    <Page.Resources>
+        <ctl:BooleanToVisibilityConverter x:Key="booltovisiblity" />
+    </Page.Resources>
     <Grid
         x:Name="ContentArea"
         Margin="12,0,12,0">
+        
 
+        
         <Grid.RowDefinitions>
             <RowDefinition x:Name="TitleRow" Height="48"/>
             <RowDefinition Height="*"/>
@@ -24,11 +29,14 @@
         <Grid 
             Grid.Row="1" 
             Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
-
+            
+            <Grid Width="auto" x:Name="loadingFrame" Background="DarkGray" Canvas.ZIndex="10" Opacity="0.5" Visibility="{x:Bind ViewModel.IsLoading, Converter={StaticResource booltovisiblity}, Mode=OneWay}">
+                <ProgressRing x:Name="progressRing" Height="50" Width="50" IsActive="{x:Bind ViewModel.IsLoading, Mode=TwoWay}"/>
+            </Grid>
             <Grid HorizontalAlignment="Center" VerticalAlignment="Top"  >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="0.05*"/>
-                    <ColumnDefinition />
+                    <ColumnDefinition MinWidth="600"/>
                     <ColumnDefinition Width="0.05*"/>
                     <ColumnDefinition />
                     <ColumnDefinition />
@@ -37,12 +45,10 @@
 
                 <ctl:ReceptionCamera x:Name="cameraControl" Grid.Column="1"></ctl:ReceptionCamera>
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                </Grid>
+                <StackPanel Orientation="Vertical" Grid.Column="4" Padding="20" Width="auto">
+                    <TextBox Header="Name" Text="{x:Bind ViewModel.NewFaceName, Mode=TwoWay}" MinWidth="200"></TextBox>
+                    <ComboBox Header="Group" Name="groupBox" ItemsSource="{x:Bind ViewModel.PersonGroups, Mode=OneWay}" DisplayMemberPath="Name" MinWidth="200"></ComboBox>
+                </StackPanel>
             </Grid>
             
             <!--The SystemControlPageBackgroundChromeLowBrush background represents where you should place your content. 
