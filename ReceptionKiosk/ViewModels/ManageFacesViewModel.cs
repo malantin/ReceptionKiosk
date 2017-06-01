@@ -15,15 +15,15 @@ namespace ReceptionKiosk.ViewModels
     public class ManageFacesViewModel : Observable
     {
         /// <summary>
-        /// Settings
+        /// FaceServiceClient Instanz
         /// </summary>
-        private static APISettingsService apiSettingsService = new APISettingsService();
-
-        //TODO: Später in einen Services auspacken
-        private FaceServiceClient fsc;
+        private FaceServiceClient faceService { get; set; }
 
         #region Commands
 
+        /// <summary>
+        /// Button Gruppe hinzufuegen
+        /// </summary>
         public ICommand AddGroupCommand { get; private set; }
 
         #endregion //Commands
@@ -111,7 +111,7 @@ namespace ReceptionKiosk.ViewModels
                 if (string.IsNullOrEmpty(GroupToAdd))
                     throw new ArgumentNullException(nameof(GroupToAdd), "Please enter a group name.");
 
-                await fsc.CreatePersonGroupAsync(Guid.NewGuid().ToString(), GroupToAdd);
+                await faceService.CreatePersonGroupAsync(Guid.NewGuid().ToString(), GroupToAdd);
                 await (new MessageDialog("Your group is added.")).ShowAsync();
             }
             catch (Exception ex)
@@ -140,7 +140,7 @@ namespace ReceptionKiosk.ViewModels
                         SelectedPersonGroup = listBoxPersonGroup.SelectedItem as PersonGroup;
                         if (SelectedPersonGroup != null)
                         {
-                            var persons = await fsc.ListPersonsAsync(SelectedPersonGroup.PersonGroupId);
+                            var persons = await faceService.ListPersonsAsync(SelectedPersonGroup.PersonGroupId);
                             persons.ForEach(p => Persons.Add(p));
                         }
                     }
@@ -184,14 +184,14 @@ namespace ReceptionKiosk.ViewModels
             }
         }
 
-        public async void Initialize()
+        public async Task InitializeAsync()
         {
             IsLoading = true;
 
-            await apiSettingsService.LoadAPIKeysFromSettingsAsync();
-            fsc = new FaceServiceClient(apiSettingsService.FaceApiKey, "https://westeurope.api.cognitive.microsoft.com/face/v1.0");
+            if (faceService == null)
+                faceService = await FaceServiceHelper.CreateNewFaceServiceAsync();
 
-            var personGroups = await fsc.ListPersonGroupsAsync();
+            var personGroups = await faceService.ListPersonGroupsAsync();
             personGroups.OrderBy(pg => pg.Name);
             personGroups.ForEach(pg => PersonGroups.Add(pg));
 

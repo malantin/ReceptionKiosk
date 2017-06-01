@@ -17,6 +17,7 @@ using Windows.Storage.FileProperties;
 using Windows.Storage.Streams;
 using Windows.System.Display;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -65,7 +66,7 @@ namespace ReceptionKiosk.Controls
             catch (UnauthorizedAccessException)
             {
                 // This will be thrown if the user denied access to the camera in privacy settings
-                ShowNoCameraAccessDialog();
+                await ShowNoCameraAccessDialogAsync();
                 return;
             }
 
@@ -122,7 +123,7 @@ namespace ReceptionKiosk.Controls
 
         }
 
-        private async void ShowNoCameraAccessDialog()
+        private async Task ShowNoCameraAccessDialogAsync()
         {
             ContentDialog noCameraAccess = new ContentDialog()
             {
@@ -135,10 +136,17 @@ namespace ReceptionKiosk.Controls
 
         private async void PreviewButtonClick(object sender, RoutedEventArgs e)
         {
-            if(!_isPreviewing)
-            { 
-                await StartPreviewAsync();
-                previewButton.IsEnabled = false;
+            if (!_isPreviewing)
+            {
+                try
+                {
+                    await StartPreviewAsync();
+                    previewButton.IsEnabled = false;
+                }
+                catch (Exception ex)
+                {
+                    await new MessageDialog(ex.Message).ShowAsync();
+                }
             }
             else
             {
@@ -171,7 +179,7 @@ namespace ReceptionKiosk.Controls
 
         //    // Sort the available resolutions from highest to lowest
         //    var availableResolutions = _mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview).Cast<VideoEncodingProperties>().OrderByDescending(v => v.Width * v.Height * (v.FrameRate.Numerator / v.FrameRate.Denominator));
-               
+
         //    // Use the highest resolution
         //    highestVideoEncodingSetting = availableResolutions.FirstOrDefault();
 

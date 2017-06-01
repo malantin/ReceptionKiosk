@@ -14,9 +14,9 @@ namespace ReceptionKiosk.Views
             InitializeComponent();
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel.Initialize();
+            await ViewModel.InitializeAsync();
         }
     }
 }

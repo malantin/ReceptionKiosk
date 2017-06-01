@@ -12,9 +12,9 @@
     <Grid
         x:Name="ContentArea"
         Margin="12,0,12,0">
-        
 
-        
+
+
         <Grid.RowDefinitions>
             <RowDefinition x:Name="TitleRow" Height="48"/>
             <RowDefinition Height="*"/>
@@ -26,33 +26,45 @@
             FontSize="28" FontWeight="SemiLight" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" VerticalAlignment="Center"
             Margin="0,0,12,7"/>
 
-        <Grid 
-            Grid.Row="1" 
-            Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
-            
+        <Grid Grid.Row="1" Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
+
             <Grid Width="auto" x:Name="loadingFrame" Background="DarkGray" Canvas.ZIndex="10" Opacity="0.5" Visibility="{x:Bind ViewModel.IsLoading, Converter={StaticResource booltovisiblity}, Mode=OneWay}">
                 <ProgressRing x:Name="progressRing" Height="50" Width="50" IsActive="{x:Bind ViewModel.IsLoading, Mode=TwoWay}"/>
             </Grid>
-            <Grid HorizontalAlignment="Center" VerticalAlignment="Top"  >
+
+            <Grid Width="auto" Height="auto" VerticalAlignment="Top">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.05*"/>
-                    <ColumnDefinition MinWidth="600"/>
-                    <ColumnDefinition Width="0.05*"/>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="0.05*"/>
+                    <ColumnDefinition MinWidth="600" Width="*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <ctl:ReceptionCamera x:Name="cameraControl" Grid.Column="1"></ctl:ReceptionCamera>
+                <ctl:ReceptionCamera x:Name="cameraControl" Grid.Column="0"></ctl:ReceptionCamera>
 
-                <StackPanel Orientation="Vertical" Grid.Column="4" Padding="20" Width="auto">
-                    <TextBox Header="Name" Text="{x:Bind ViewModel.NewFaceName, Mode=TwoWay}" MinWidth="200"></TextBox>
-                    <ComboBox Header="Group" Name="groupBox" ItemsSource="{x:Bind ViewModel.PersonGroups, Mode=OneWay}" DisplayMemberPath="Name" MinWidth="200"></ComboBox>
+                <StackPanel Orientation="Vertical" Grid.Column="1" Padding="20" Width="auto">
+                    <TextBox Header="Name" Text="{x:Bind ViewModel.NewFaceName, Mode=TwoWay}" />
+                    <ComboBox Header="Group" Name="groupBox" ItemsSource="{x:Bind ViewModel.PersonGroups, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedPersonGroup, Mode=OneWay}" SelectedValuePath="PersonGroupId" DisplayMemberPath="Name" />
+                    <GridView Margin="5" ItemsSource="{x:Bind ViewModel.Pictures}" SelectionMode="None">
+                        <GridView.ItemTemplate>
+                            <DataTemplate x:DataType="BitmapImage">
+                                <StackPanel>
+                                    <Image Height="100" Width="100" Source="{x:Bind}"/>
+                                    <AppBarButton Content="Delete" Icon="Delete" Label="Delete"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
+
+                        <!--<GridView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <ItemsWrapGrid MaximumRowsOrColumns="3" />
+                            </ItemsPanelTemplate>
+                        </GridView.ItemsPanel>-->
+                    </GridView>
+                    <StackPanel Orientation="Horizontal">
+                        <AppBarButton x:Name="addPersonButton" Content="Add Person" Label="Add Person" Icon="AddFriend" Command="{x:Bind ViewModel.AddPersonCommand}" />
+                        <AppBarButton x:Name="browsPicturesButton"  Content="Browse Folder" Label="Browse Folder" Icon="BrowsePhotos" Command="{x:Bind ViewModel.BrowsePictureCommand}" />
+                    </StackPanel>
                 </StackPanel>
             </Grid>
-            
-            <!--The SystemControlPageBackgroundChromeLowBrush background represents where you should place your content. 
-                Place your content here.-->
         </Grid>
 
         <!--  Adaptive triggers  -->

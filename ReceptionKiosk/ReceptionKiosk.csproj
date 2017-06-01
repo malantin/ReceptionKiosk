@@ -112,10 +112,15 @@
   <ItemGroup>
     <Compile Include="Activation\ActivationHandler.cs" />
     <Compile Include="Controls\Converters.cs" />
+    <Compile Include="Controls\ImageWithCancel.xaml.cs">
+      <DependentUpon>ImageWithCancel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ReceptionCamera.xaml.cs">
       <DependentUpon>ReceptionCamera.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\FaceServiceHelper.cs" />
     <Compile Include="Helpers\IEnumerableExtensions.cs" />
+    <Compile Include="Helpers\ImageAnalyzer.cs" />
     <Compile Include="Helpers\Json.cs" />
     <Compile Include="Helpers\Observable.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
@@ -233,6 +238,10 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\ImageWithCancel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\ReceptionCamera.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

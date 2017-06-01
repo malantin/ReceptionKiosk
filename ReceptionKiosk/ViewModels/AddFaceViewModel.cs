@@ -1,22 +1,33 @@
-using System;
-
-using ReceptionKiosk.Helpers;
-using ReceptionKiosk.Services;
 using Microsoft.ProjectOxford.Face;
-using System.Collections.ObjectModel;
 using Microsoft.ProjectOxford.Face.Contract;
+using ReceptionKiosk.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using Windows.UI.Popups;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace ReceptionKiosk.ViewModels
 {
     public class AddFaceViewModel : Observable
     {
-        private static APISettingsService apiSettingsService = new APISettingsService();
+        /// <summary>
+        /// FaceServiceClient Instanz
+        /// </summary>
+        private FaceServiceClient FaceService { get; set; }
 
-        private FaceServiceClient fsc;
+        #region Commands
 
-        public string NewFaceName { get; set; }
+        public ICommand AddPersonCommand { get; set; }
+
+        public ICommand BrowsePictureCommand { get; set; }
+
+        #endregion //Commands
 
         #region Properties
 
@@ -27,6 +38,20 @@ namespace ReceptionKiosk.ViewModels
             set { Set(ref _isLoading, value); }
         }
 
+        private string _newFaceName;
+        public string NewFaceName
+        {
+            get { return _newFaceName; }
+            set { Set(ref _newFaceName, value); }
+        }
+
+        private PersonGroup _selectedPersonGroup;
+        public PersonGroup SelectedPersonGroup
+        {
+            get { return _selectedPersonGroup; }
+            set { Set(ref _selectedPersonGroup, value); }
+        }
+
         #endregion
 
         /// <summary>
@@ -34,19 +59,67 @@ namespace ReceptionKiosk.ViewModels
         /// </summary>
         public ObservableCollection<PersonGroup> PersonGroups { get; private set; }
 
+        /// <summary>
+        /// Lieste aller Bilder
+        /// </summary>
+        public ObservableCollection<BitmapImage> Pictures { get; private set; }
+
         public AddFaceViewModel()
         {
             PersonGroups = new ObservableCollection<PersonGroup>();
+            Pictures = new ObservableCollection<BitmapImage>();
+
+            AddPersonCommand = new RelayCommand(async () => await ExecuteAddPersonCommand());
+            BrowsePictureCommand = new RelayCommand(async () => await ExecuteBrowsePictureCommandAsync());
         }
 
-        public async Task Initialize()
+        #region BrowsePictureCommand
+
+        private async Task ExecuteBrowsePictureCommandAsync()
+        {
+            try
+            {
+                FileOpenPicker fileOpenPicker = new FileOpenPicker() { SuggestedStartLocation = PickerLocationId.PicturesLibrary, ViewMode = PickerViewMode.Thumbnail };
+                fileOpenPicker.FileTypeFilter.Add(".jpg");
+                fileOpenPicker.FileTypeFilter.Add(".jpeg");
+                fileOpenPicker.FileTypeFilter.Add(".png");
+                fileOpenPicker.FileTypeFilter.Add(".bmp");
+                IReadOnlyList<StorageFile> selectedFiles = await fileOpenPicker.PickMultipleFilesAsync();
+                
+                if (selectedFiles != null)
+                {
+                    foreach (var item in selectedFiles)
+                    {
+                        var bitmap = new BitmapImage();
+                        using (var stream = await item.OpenReadAsync())
+                        {
+                            await bitmap.SetSourceAsync(stream);
+                            Pictures.Add(bitmap);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await new MessageDialog(ex.Message).ShowAsync();
+            }
+        }
+
+        #endregion //BrowsePictureCommand
+
+        private async Task ExecuteAddPersonCommand()
+        {
+            string br = "";
+        }
+
+        public async Task InitializeAsync()
         {
             IsLoading = true;
 
-            await apiSettingsService.LoadAPIKeysFromSettingsAsync();
-            fsc = new FaceServiceClient(apiSettingsService.FaceApiKey, "https://westeurope.api.cognitive.microsoft.com/face/v1.0");
+            if (FaceService == null)
+                FaceService = await FaceServiceHelper.CreateNewFaceServiceAsync();
 
-            var personGroupResult = await fsc.ListPersonGroupsAsync();
+            var personGroupResult = await FaceService.ListPersonGroupsAsync();
             personGroupResult.OrderBy(pg => pg.Name);
             personGroupResult.ForEach(pg => PersonGroups.Add(pg));
 

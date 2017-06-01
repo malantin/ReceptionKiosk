@@ -19,9 +19,9 @@
                 <AppBarButton.Flyout>
                     <Flyout x:Name="addPersonGroupFlyout">
                         <StackPanel Orientation="Horizontal">
-                            <TextBox x:Name="personGroupNameTextBox" TextWrapping="Wrap" Width="262" PlaceholderText="Enter group name (e.g. Coworkers)"/>
-                            <Button x:Name="button" Content="Add" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,0" />
-                            <Button x:Name="button_Copy" Content="Cancel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                            <TextBox x:Name="personGroupNameTextBox" TextWrapping="Wrap" Width="262" PlaceholderText="Enter group name (e.g. Coworkers)" Text="{x:Bind ViewModel.GroupToAdd, Mode=TwoWay}"/>
+                            <Button x:Name="addPersonGroupButton" Content="Add" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,0" Command="{x:Bind ViewModel.AddGroupCommand}"/>
+                            <Button x:Name="cancelPersonGroupButton" Content="Cancel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                         </StackPanel>
                     </Flyout>
                 </AppBarButton.Flyout>
@@ -59,7 +59,7 @@
             <TextBlock Grid.Row="0" Grid.Column="2" Text="Faces" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
             <!-- SUBCONTENT -->
-            <ListBox Grid.Row="1" Grid.Column="0" x:Name="listBoxPersonGroups" ItemsSource="{x:Bind ViewModel.PersonGroups}" DisplayMemberPath="Name" SelectionChanged="{x:Bind ViewModel.OnPersonGroupChanged}"/>
+            <ListBox Grid.Row="1" Grid.Column="0" x:Name="listBoxPersonGroups" ItemsSource="{x:Bind ViewModel.PersonGroups}" DisplayMemberPath="Name" SelectedItem="{x:Bind ViewModel.SelectedPersonGroup, Mode=OneWay}" SelectionChanged="{x:Bind ViewModel.OnPersonGroupChanged}"/>
             <ListBox Grid.Row="1" Grid.Column="1" x:Name="listBoxPersons" ItemsSource="{x:Bind ViewModel.Persons}" DisplayMemberPath="Name" SelectionChanged="{x:Bind ViewModel.OnPersonChanged}"/>
             <TextBlock Grid.Row="1" Grid.Column="2" x:Name="countOfFaces" Text="{x:Bind ViewModel.CountOfFaces, Mode=TwoWay}" />
             <!--<ListView ItemsSource="{x:Bind ViewModel.PersonFaces}">

@@ -24,7 +24,7 @@
         <Grid x:Name="commandBar" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="2" Grid.Row="1" Grid.Column="1" Padding="10">
             <StackPanel Orientation="Horizontal">
                 <Button x:Name="previewButton" Margin="1" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="#FF222222" BorderBrush="Transparent" Click="PreviewButtonClick" >
-                    <SymbolIcon x:Name="startVideoSymbol" Margin="6" Symbol="Play" Foreground="White"></SymbolIcon>
+                    <SymbolIcon x:Name="startVideoSymbol" Margin="6" Symbol="Target" Foreground="White"></SymbolIcon>
                 </Button>
                 <Button x:Name="photoButton" Margin="1" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="#FF222222" BorderBrush="Transparent" Click="CameraControlButtonClick" IsEnabled="False" >
                     <SymbolIcon x:Name="cameraControlSymbol" Margin="6" Symbol="Camera" Foreground="White"></SymbolIcon>

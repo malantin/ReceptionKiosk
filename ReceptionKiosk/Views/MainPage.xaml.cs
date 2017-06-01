@@ -1,6 +1,7 @@
 using ReceptionKiosk.ViewModels;
 
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Navigation;
 
 namespace ReceptionKiosk.Views
 {
@@ -10,6 +11,11 @@ namespace ReceptionKiosk.Views
         public MainPage()
         {
             InitializeComponent();
+        }
+
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            await ViewModel.InitializeAsync();
         }
     }
 }

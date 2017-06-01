@@ -1,14 +1,8 @@
 using ReceptionKiosk.ViewModels;
-using Windows.Media.Capture;
 using Windows.ApplicationModel;
-using System.Threading.Tasks;
-using Windows.System.Display;
-using Windows.Graphics.Display;
-using Windows.UI.Xaml.Controls;
-using System;
-using Windows.UI.Core;
-using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Navigation;
 
 namespace ReceptionKiosk.Views
 {
@@ -24,7 +18,7 @@ namespace ReceptionKiosk.Views
 
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
-            await ViewModel.Initialize();
+            await ViewModel.InitializeAsync();
 
             if (groupBox.Items.Count > 0) groupBox.SelectedIndex = 0;
         }
