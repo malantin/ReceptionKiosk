@@ -14,6 +14,12 @@ using Windows.UI.Xaml.Media.Imaging;
 
 namespace ReceptionKiosk.ViewModels
 {
+    public class PictureWithDelete
+    {
+        public Guid ID { get; set; }
+        public BitmapImage Image { get; set; }
+    }
+
     public class AddFaceViewModel : Observable
     {
         /// <summary>
@@ -23,9 +29,11 @@ namespace ReceptionKiosk.ViewModels
 
         #region Commands
 
-        public ICommand AddPersonCommand { get; set; }
+        public RelayCommand AddPersonCommand { get; private set; }
 
-        public ICommand BrowsePictureCommand { get; set; }
+        public ICommand BrowsePictureCommand { get; private set; }
+
+        public ICommand DeletePictureCommand { get; private set; }
 
         #endregion //Commands
 
@@ -42,7 +50,7 @@ namespace ReceptionKiosk.ViewModels
         public string NewFaceName
         {
             get { return _newFaceName; }
-            set { Set(ref _newFaceName, value); }
+            set { Set(ref _newFaceName, value); AddPersonCommand.OnCanExecuteChanged(); }
         }
 
         private PersonGroup _selectedPersonGroup;
@@ -60,17 +68,23 @@ namespace ReceptionKiosk.ViewModels
         public ObservableCollection<PersonGroup> PersonGroups { get; private set; }
 
         /// <summary>
-        /// Lieste aller Bilder
+        /// Liste aller Bilder
         /// </summary>
-        public ObservableCollection<BitmapImage> Pictures { get; private set; }
+        public ObservableCollection<PictureWithDelete> Pictures { get; private set; }
 
         public AddFaceViewModel()
         {
             PersonGroups = new ObservableCollection<PersonGroup>();
-            Pictures = new ObservableCollection<BitmapImage>();
+            Pictures = new ObservableCollection<PictureWithDelete>();
 
-            AddPersonCommand = new RelayCommand(async () => await ExecuteAddPersonCommand());
+            AddPersonCommand = new RelayCommand(async () => await ExecuteAddPersonCommand(), CanExecuteAddPersonCommand);
             BrowsePictureCommand = new RelayCommand(async () => await ExecuteBrowsePictureCommandAsync());
+            //DeletePictureCommand = new RelayCommand<object>(async () => await );
+        }
+
+        private bool CanExecuteAddPersonCommand()
+        {
+            return !string.IsNullOrEmpty(NewFaceName);
         }
 
         #region BrowsePictureCommand
@@ -85,7 +99,7 @@ namespace ReceptionKiosk.ViewModels
                 fileOpenPicker.FileTypeFilter.Add(".png");
                 fileOpenPicker.FileTypeFilter.Add(".bmp");
                 IReadOnlyList<StorageFile> selectedFiles = await fileOpenPicker.PickMultipleFilesAsync();
-                
+
                 if (selectedFiles != null)
                 {
                     foreach (var item in selectedFiles)
@@ -94,7 +108,7 @@ namespace ReceptionKiosk.ViewModels
                         using (var stream = await item.OpenReadAsync())
                         {
                             await bitmap.SetSourceAsync(stream);
-                            Pictures.Add(bitmap);
+                            Pictures.Add(new PictureWithDelete() { ID = Guid.NewGuid(), Image = bitmap });
                         }
                     }
                 }

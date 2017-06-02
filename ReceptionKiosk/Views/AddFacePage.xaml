@@ -45,10 +45,10 @@
                     <ComboBox Header="Group" Name="groupBox" ItemsSource="{x:Bind ViewModel.PersonGroups, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedPersonGroup, Mode=OneWay}" SelectedValuePath="PersonGroupId" DisplayMemberPath="Name" />
                     <GridView Margin="5" ItemsSource="{x:Bind ViewModel.Pictures}" SelectionMode="None">
                         <GridView.ItemTemplate>
-                            <DataTemplate x:DataType="BitmapImage">
+                            <DataTemplate >
                                 <StackPanel>
-                                    <Image Height="100" Width="100" Source="{x:Bind}"/>
-                                    <AppBarButton Content="Delete" Icon="Delete" Label="Delete"/>
+                                    <Image Height="100" Width="100" Source="{Binding Image}" />
+                                    <AppBarButton Content="Delete" Icon="Delete" Label="Delete" HorizontalAlignment="Center" CommandParameter="{Binding ID}" />
                                 </StackPanel>
                             </DataTemplate>
                         </GridView.ItemTemplate>
