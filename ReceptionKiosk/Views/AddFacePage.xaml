@@ -55,9 +55,10 @@
                                 <ItemsWrapGrid MaximumRowsOrColumns="3" />
                             </ItemsPanelTemplate>
                         </GridView.ItemsPanel>-->
+                        
                     </GridView>
                     <StackPanel Orientation="Horizontal">
-                        <AppBarButton x:Name="addPersonButton" Content="Add Person" Label="Add Person" Icon="AddFriend" Command="{x:Bind ViewModel.AddPersonCommand}" />
+                        <AppBarButton x:Name="addPersonButton" Content="Add Person" Label="Add Person" Icon="Add" Command="{x:Bind ViewModel.AddPersonCommand}" />
                         <AppBarButton x:Name="browsPicturesButton"  Content="Browse Folder" Label="Browse Folder" Icon="BrowsePhotos" Command="{x:Bind ViewModel.BrowsePictureCommand}" />
                     </StackPanel>
                 </StackPanel>

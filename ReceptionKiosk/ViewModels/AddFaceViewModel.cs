@@ -40,7 +40,7 @@ namespace ReceptionKiosk.ViewModels
             set { Set(ref _isLoading, value); }
         }
 
-        private string _newFaceName;
+        private string _newFaceName = String.Empty;
         public string NewFaceName
         {
             get { return _newFaceName; }
@@ -128,7 +128,13 @@ namespace ReceptionKiosk.ViewModels
 
         private async Task ExecuteAddPersonCommand()
         {
-            string br = "";
+            if (NewFaceName != string.Empty && Pictures.Count > 0)
+            {
+                
+            }
+            else {
+                await new MessageDialog("Please make sure you have set a name, selected a group and added at least one photo.").ShowAsync();
+            }
         }
 
         public async Task InitializeAsync()
