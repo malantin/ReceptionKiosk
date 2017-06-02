@@ -7,6 +7,7 @@
     xmlns:ctl="using:ReceptionKiosk.Controls"    
     mc:Ignorable="d">
 
+    
     <Page.Resources>
         <ctl:SelectedItemConverter x:Key="selectedItemConverter" />
     </Page.Resources>
@@ -79,7 +80,7 @@
             <!-- SUBCONTENT -->
             <ListBox Grid.Row="1" Grid.Column="0" x:Name="listBoxPersonGroups" ItemsSource="{x:Bind ViewModel.PersonGroups, Mode=OneWay}" DisplayMemberPath="Name" SelectionMode="Single" SelectedItem="{x:Bind ViewModel.SelectedPersonGroup, Mode=TwoWay, Converter={StaticResource selectedItemConverter}}" SelectionChanged="{x:Bind ViewModel.OnPersonGroupChanged}" />
             <ListBox Grid.Row="1" Grid.Column="1" x:Name="listBoxPersons" ItemsSource="{x:Bind ViewModel.Persons}" DisplayMemberPath="Name" SelectionMode="Single" SelectedItem="{x:Bind ViewModel.SelectedPerson, Mode=TwoWay, Converter={StaticResource selectedItemConverter}}" SelectionChanged="{x:Bind ViewModel.OnPersonChanged}"/>
-            <TextBlock Grid.Row="1" Grid.Column="2" x:Name="countOfFaces" Text="{x:Bind ViewModel.CountOfFaces, Mode=TwoWay}" />
+            <TextBlock Grid.Row="1" Grid.Column="2" x:Name="countOfFaces" Text="{x:Bind ViewModel.CountOfFaces, Mode=TwoWay}" Margin="10,10,0,0" />
         </Grid>
 
         <!--  Adaptive triggers  -->
