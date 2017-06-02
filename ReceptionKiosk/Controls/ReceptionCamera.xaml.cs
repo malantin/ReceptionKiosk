@@ -1,5 +1,8 @@
-﻿using System;
+﻿using ReceptionKiosk.Helpers;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -24,28 +27,50 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace ReceptionKiosk.Controls
 {
-    public sealed partial class ReceptionCamera : UserControl
+    public sealed partial class ReceptionCamera : UserControl, INotifyPropertyChanged
     {
-        MediaCapture _mediaCapture;
-        bool _isPreviewing;
-        DisplayRequest _displayRequest = new DisplayRequest();
+        public MediaCapture _mediaCapture;
+
+        ObservableCollection<BitmapWrapper> _pictures;
+
+        public ObservableCollection<BitmapWrapper> Pictures { get { return _pictures; } set { _pictures = value; } }
+
+        //Is the camera preview active?
+        private bool _isPreviewing;
+
+        private DisplayRequest _displayRequest = new DisplayRequest();
         private SemaphoreSlim frameProcessingSemaphore = new SemaphoreSlim(1);
+
+        public bool IsPreviewing
+        {
+            get { return _isPreviewing;}
+            set { _isPreviewing = value; OnPropertyChanged("IsPreviewing"); }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public int CameraResolutionWidth { get; private set; }
         public int CameraResolutionHeight { get; private set; }
-        public double CameraAspectRatio { get; set; }
+        public double CameraAspectRatio { get; set; }    
 
         public ReceptionCamera()
         {
             this.InitializeComponent();
-            photoButton.IsEnabled = false;
+            IsPreviewing = false;
         }
 
+        void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        /// <summary>
+        /// Hides the grid that contains the preview and photo button
+        /// </summary>
         public void HideCameraControls()
         {
             this.commandBar.Visibility = Visibility.Collapsed;
@@ -53,15 +78,14 @@ namespace ReceptionKiosk.Controls
 
         public async Task StartPreviewAsync()
         {
+            IsPreviewing = true;
             try
             {
-
                 _mediaCapture = new MediaCapture();
                 await _mediaCapture.InitializeAsync();
 
                 _displayRequest.RequestActive();
                 DisplayInformation.AutoRotationPreferences = DisplayOrientations.Landscape;
-                photoButton.IsEnabled = true;
             }
             catch (UnauthorizedAccessException)
             {
@@ -74,38 +98,22 @@ namespace ReceptionKiosk.Controls
             {
                 CameraPreview.Source = _mediaCapture;
                 await _mediaCapture.StartPreviewAsync();
-                _isPreviewing = true;
             }
             catch (System.IO.FileLoadException)
             {
-                //_mediaCapture.CaptureDeviceExclusiveControlStatusChanged += _mediaCapture_CaptureDeviceExclusiveControlStatusChanged;
+                //TODO Handle the exception
             }
 
         }
-
-        //private async void _mediaCapture_CaptureDeviceExclusiveControlStatusChanged(MediaCapture sender, MediaCaptureDeviceExclusiveControlStatusChangedEventArgs args)
-        //{
-        //    if (args.Status == MediaCaptureDeviceExclusiveControlStatus.SharedReadOnlyAvailable)
-        //    {
-        //        ShowMessageToUser("The camera preview can't be displayed because another app has exclusive access");
-        //    }
-        //    else if (args.Status == MediaCaptureDeviceExclusiveControlStatus.ExclusiveControlAvailable && !_isPreviewing)
-        //    {
-        //        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
-        //        {
-        //            await StartPreviewAsync();
-        //        });
-        //    }
-        //}
 
         public async Task CleanupCameraAsync()
         {
             if (_mediaCapture != null)
             {
-                if (_isPreviewing)
+                if (IsPreviewing)
                 {
                     await _mediaCapture.StopPreviewAsync();
-                    _isPreviewing = false;
+                    IsPreviewing = false;
                 }
 
                 await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
@@ -123,20 +131,30 @@ namespace ReceptionKiosk.Controls
 
         }
 
+        /// <summary>
+        /// Display a dialog if access to the camera was denied
+        /// </summary>
+        /// <returns></returns>
         private async Task ShowNoCameraAccessDialogAsync()
         {
             ContentDialog noCameraAccess = new ContentDialog()
             {
                 Title = "No access to camera",
-                Content = "This app needs to access the default camera."
+                Content = "This app needs to access the default camera.",
+                PrimaryButtonText = "OK"
             };
 
             await noCameraAccess.ShowAsync();
         }
 
+        /// <summary>
+        /// Starts the camera preview on the capture element
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void PreviewButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!_isPreviewing)
+            if (!IsPreviewing)
             {
                 try
                 {
@@ -148,16 +166,16 @@ namespace ReceptionKiosk.Controls
                     await new MessageDialog(ex.Message).ShowAsync();
                 }
             }
-            else
-            {
-
-            }
         }
 
-
+        /// <summary>
+        /// Handles the camera button click to take a picture
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void CameraControlButtonClick(object sender, RoutedEventArgs e)
         {
-            if (this.cameraControlSymbol.Symbol == Symbol.Camera)
+            if (IsPreviewing)
             {
                 var img = await CaptureFrameAsync();
                 if (img != null)
@@ -167,10 +185,15 @@ namespace ReceptionKiosk.Controls
             }
             else
             {
-                //this.cameraControlSymbol.Symbol = Symbol.Camera;
-
                 await StartPreviewAsync();
             }
+        }
+
+        public void Reset()
+        {
+            IsPreviewing = false;
+            CameraPreview.Source = null;
+            previewButton.IsEnabled = true;
         }
 
         //private async Task SetVideoEncodingToHighestResolution()
@@ -193,7 +216,12 @@ namespace ReceptionKiosk.Controls
         //    }
         //}
 
-        public async Task<Uri> CaptureFrameAsync()
+        
+        /// <summary>
+        /// Captures a frame from the camera preview and saves the photo
+        /// </summary>
+        /// <returns></returns>
+        public async Task<SoftwareBitmap> CaptureFrameAsync()
         {
             try
             {
@@ -223,30 +251,55 @@ namespace ReceptionKiosk.Controls
                 var myPictures = await Windows.Storage.StorageLibrary.GetLibraryAsync(Windows.Storage.KnownLibraryId.Pictures);
                 StorageFile file = await myPictures.SaveFolder.CreateFileAsync($"photo-{DateTime.Now.ToString("yyyy-MM-dd-hh-m-s")}.jpg", CreationCollisionOption.GenerateUniqueName);
 
-                using (var captureStream = new InMemoryRandomAccessStream())
+                var lowLagCapture = await _mediaCapture.PrepareLowLagPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Bgra8));
+
+                var capturedPhoto = await lowLagCapture.CaptureAsync();
+                var softwareBitmap = capturedPhoto.Frame.SoftwareBitmap;
+
+                await lowLagCapture.FinishAsync();
+
+                //Save image to disk
+                using (var filestream = await file.OpenAsync(FileAccessMode.ReadWrite))
                 {
-                    await _mediaCapture.CapturePhotoToStreamAsync(ImageEncodingProperties.CreateJpeg(), captureStream);
+                    // Create an encoder with the desired format
+                    BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, filestream);
+                    encoder.SetSoftwareBitmap(softwareBitmap);
+                    await encoder.FlushAsync();
 
-                    using (var fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
+                    // Create SoftwareBitmapSource and save to Pictures collection if available
+                    if (Pictures != null)
                     {
-                        var decoder = await BitmapDecoder.CreateAsync(captureStream);
-                        var encoder = await BitmapEncoder.CreateForTranscodingAsync(fileStream, decoder);
-
-                        var properties = new BitmapPropertySet
-                        {
-                            { "System.Photo.Orientation", new BitmapTypedValue(PhotoOrientation.Normal, PropertyType.UInt16) }
-                         };
-                        await encoder.BitmapProperties.SetPropertiesAsync(properties);
-
-                        await encoder.FlushAsync();
-                    }
+                        softwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+                        var softwareBitmapSource = new SoftwareBitmapSource();
+                        await softwareBitmapSource.SetBitmapAsync(softwareBitmap);
+                        Pictures.Add(new BitmapWrapper(softwareBitmap, softwareBitmapSource));
+                    }                    
                 }
 
-                return new Uri(file.Path);
+                //using (var captureStream = new InMemoryRandomAccessStream())
+                //{
+                //    await _mediaCapture.CapturePhotoToStreamAsync(ImageEncodingProperties.CreateJpeg(), captureStream);
+
+                //    using (var fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
+                //    {
+                //        var decoder = await BitmapDecoder.CreateAsync(captureStream);
+                //        var encoder = await BitmapEncoder.CreateForTranscodingAsync(fileStream, decoder);
+
+                //        var properties = new BitmapPropertySet
+                //        {
+                //            { "System.Photo.Orientation", new BitmapTypedValue(PhotoOrientation.Normal, PropertyType.UInt16) }
+                //         };
+                //        await encoder.BitmapProperties.SetPropertiesAsync(properties);
+
+                //        await encoder.FlushAsync();
+                //    }
+                //}
+
+                return softwareBitmap;
             }
             catch (Exception ex)
             {
-
+                //TODO Handle the exception
             }
             finally
             {
@@ -254,6 +307,11 @@ namespace ReceptionKiosk.Controls
             }
 
             return null;
+        }
+
+        internal void SetPictureLib(ObservableCollection<BitmapWrapper> pictures)
+        {
+            Pictures = pictures;
         }
     }
 }

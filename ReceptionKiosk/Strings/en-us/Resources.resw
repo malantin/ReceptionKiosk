@@ -126,25 +126,24 @@
   <data name="Settings_Theme.Text" xml:space="preserve">
     <value>Theme</value>
   </data>
-  <data name="Settings_ThemeToggle.OnContent" xml:space="preserve">  
+  <data name="Settings_ThemeToggle.OnContent" xml:space="preserve">
     <value>Light</value>
   </data>
-  <data name="Settings_ThemeToggle.OffContent" xml:space="preserve">    
+  <data name="Settings_ThemeToggle.OffContent" xml:space="preserve">
     <value>Dark</value>
   </data>
-  <data name="Settings_About.Text" xml:space="preserve">    
+  <data name="Settings_About.Text" xml:space="preserve">
     <value>About this application</value>
   </data>
-  <data name="Settings_AboutDescription.Text" xml:space="preserve">    
+  <data name="Settings_AboutDescription.Text" xml:space="preserve">
     <value>Settings page placeholder text.  Your app description goes here.</value>
   </data>
-  <data name="Settings_PrivacyTermsLink.Content" xml:space="preserve">    
+  <data name="Settings_PrivacyTermsLink.Content" xml:space="preserve">
     <value>Privacy Terms</value>
   </data>
-  <data name="Settings_PrivacyTermsLink.NavigateUri" xml:space="preserve">  
+  <data name="Settings_PrivacyTermsLink.NavigateUri" xml:space="preserve">
     <value>https://YourPrivacyUrlGoesHere/</value>
   </data>
-  NavigateUri
   <data name="Admin_Title.Text" xml:space="preserve">
     <value>Admin</value>
   </data>
@@ -168,5 +167,8 @@
   </data>
   <data name="Shell_ManageFaces" xml:space="preserve">
     <value>ManageFaces</value>
+  </data>
+  <data name="AddFace_CompleteInformation" xml:space="preserve">
+    <value>Please make sure you have set a name, selected a group and added at least one photo.</value>
   </data>
 </root>

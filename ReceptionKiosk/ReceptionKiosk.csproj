@@ -115,6 +115,7 @@
     <Compile Include="Controls\ReceptionCamera.xaml.cs">
       <DependentUpon>ReceptionCamera.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\BitmapWrapper.cs" />
     <Compile Include="Helpers\FaceServiceHelper.cs" />
     <Compile Include="Helpers\IEnumerableExtensions.cs" />
     <Compile Include="Helpers\ImageAnalyzer.cs" />

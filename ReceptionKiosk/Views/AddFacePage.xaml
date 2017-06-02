@@ -12,9 +12,6 @@
     <Grid
         x:Name="ContentArea"
         Margin="12,0,12,0">
-
-
-
         <Grid.RowDefinitions>
             <RowDefinition x:Name="TitleRow" Height="48"/>
             <RowDefinition Height="*"/>
@@ -38,17 +35,17 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <ctl:ReceptionCamera x:Name="cameraControl" Grid.Column="0"></ctl:ReceptionCamera>
+                <ctl:ReceptionCamera x:Name="cameraControl" Grid.Column="0" Margin="10"></ctl:ReceptionCamera>
 
                 <StackPanel Orientation="Vertical" Grid.Column="1" Padding="20" Width="auto">
-                    <TextBox Header="Name" Text="{x:Bind ViewModel.NewFaceName, Mode=TwoWay}" />
-                    <ComboBox Header="Group" Name="groupBox" ItemsSource="{x:Bind ViewModel.PersonGroups, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedPersonGroup, Mode=OneWay}" SelectedValuePath="PersonGroupId" DisplayMemberPath="Name" />
+                    <TextBox Header="Name" Text="{Binding NewFaceName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <ComboBox Header="Group" Name="groupBox" ItemsSource="{x:Bind ViewModel.PersonGroups, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedPersonGroup, Mode=OneWay}" SelectedValuePath="PersonGroupId" DisplayMemberPath="Name" SelectionChanged="ViewModel.SelectionChanged"/>
                     <GridView Margin="5" ItemsSource="{x:Bind ViewModel.Pictures}" SelectionMode="None">
                         <GridView.ItemTemplate>
-                            <DataTemplate >
+                            <DataTemplate>
                                 <StackPanel>
-                                    <Image Height="100" Width="100" Source="{Binding Image}" />
-                                    <AppBarButton Content="Delete" Icon="Delete" Label="Delete" HorizontalAlignment="Center" CommandParameter="{Binding ID}" />
+                                    <Image Height="100" Width="100" Source="{Binding Path=BitmapSource}"/>
+                                    <AppBarButton Content="Delete" Icon="Delete" Label="Delete" />
                                 </StackPanel>
                             </DataTemplate>
                         </GridView.ItemTemplate>
@@ -58,10 +55,11 @@
                                 <ItemsWrapGrid MaximumRowsOrColumns="3" />
                             </ItemsPanelTemplate>
                         </GridView.ItemsPanel>-->
+                        
                     </GridView>
                     <StackPanel Orientation="Horizontal">
-                        <AppBarButton x:Name="addPersonButton" Content="Add Person" Label="Add Person" Icon="AddFriend" Command="{x:Bind ViewModel.AddPersonCommand}" />
-                        <AppBarButton x:Name="browsPicturesButton"  Content="Browse Folder" Label="Browse Folder" Icon="BrowsePhotos" Command="{x:Bind ViewModel.BrowsePictureCommand}" />
+                        <AppBarButton x:Name="browsePicturesButton"  Content="Browse Folder" Label="Browse Folder" Icon="BrowsePhotos" Command="{x:Bind ViewModel.BrowsePictureCommand}" />
+                        <AppBarButton x:Name="addPersonButton" Content="Add Person" Label="Add Person" Icon="Add" Command="{x:Bind ViewModel.AddPersonCommand}" />
                     </StackPanel>
                 </StackPanel>
             </Grid>
