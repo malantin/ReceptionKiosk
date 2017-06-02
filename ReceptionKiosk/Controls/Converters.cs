@@ -32,10 +32,6 @@
 // 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Data;
 
@@ -51,6 +47,23 @@ namespace ReceptionKiosk.Controls
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
             return ((Visibility)value) == Visibility.Visible ? true : false;
+        }
+    }
+
+    /// <summary>
+    /// This converter ist needed, because for SelectedItem and Mode=TwoWay
+    /// https://social.msdn.microsoft.com/Forums/silverlight/en-US/59731efc-4f15-462b-ad1d-cfa9bb684b62/uwp-combobox-selecteditem-not-being-respected?forum=wpdevelop
+    /// </summary>
+    public class SelectedItemConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            return value;
         }
     }
 }

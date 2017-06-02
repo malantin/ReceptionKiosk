@@ -4,7 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ctl="using:ReceptionKiosk.Controls"    
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <ctl:SelectedItemConverter x:Key="selectedItemConverter" />
+    </Page.Resources>
 
     <Grid x:Name="ContentArea" Margin="12,0,12,0">
 
@@ -15,17 +20,30 @@
 
         <!-- COMMANDBAR -->
         <CommandBar Grid.Row="0" x:Name="commandBar" VerticalAlignment="Top" HorizontalContentAlignment="Stretch">
-            <AppBarButton Icon="Add" Label="Add Group">
+            <AppBarButton x:Name="refreshUiButton" IsEnabled="False" Icon="Refresh" Label="Refresh" />
+            <AppBarButton x:Name="openAddFlyoutButton" Icon="Add" Label="Add">
                 <AppBarButton.Flyout>
-                    <Flyout x:Name="addPersonGroupFlyout">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox x:Name="personGroupNameTextBox" TextWrapping="Wrap" Width="262" PlaceholderText="Enter group name (e.g. Coworkers)" Text="{x:Bind ViewModel.GroupToAdd, Mode=TwoWay}"/>
-                            <Button x:Name="addPersonGroupButton" Content="Add" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,0" Command="{x:Bind ViewModel.AddGroupCommand}"/>
-                            <Button x:Name="cancelPersonGroupButton" Content="Cancel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                    <Flyout x:Name="addFlyout">
+                        <StackPanel Orientation="Vertical">
+                            <!-- ADD PERSON GROUP -->
+                            <TextBox x:Name="personGroupNameTextBox" Header="Group" TextWrapping="Wrap" Width="262" PlaceholderText="Enter group name (e.g. Visitors)" Text="{x:Bind ViewModel.GroupToAdd, Mode=TwoWay}"/>
+                            <Button x:Name="addPersonGroupButton" Margin="0,5,0,0" Content="Add" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.AddGroupCommand}" />
+
+                            <!-- OR -->
+                            <TextBlock Text="- OR -" Margin="0,10,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" />
+
+                            <!-- ADD PERSON -->
+                            <ComboBox x:Name="groupsComboBox" Header="Choose Group" ItemsSource="{x:Bind ViewModel.PersonGroups}" DisplayMemberPath="Name" SelectedItem="{x:Bind ViewModel.SelectedGroupToAddPerson, Mode=TwoWay, Converter={StaticResource selectedItemConverter}}" />
+                            <TextBox x:Name="personNameTextBox" Header="Person" TextWrapping="Wrap" Width="262" PlaceholderText="Enter person name (e.g. Bill Gates)" Text="{x:Bind ViewModel.PersonToAdd, Mode=TwoWay}"/>
+                            <Button x:Name="addPersonButton" Margin="0,5,0,0" Content="Add" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.AddPersonCommand}" />
                         </StackPanel>
                     </Flyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
+            
+            <AppBarSeparator />
+
+            <AppBarButton x:Name="openDeleteFlyoutButton" Icon="Delete" Label="Delete" Command="{x:Bind ViewModel.DeleteCommand}" />
         </CommandBar>
 
         <!-- Heading -->
@@ -59,18 +77,9 @@
             <TextBlock Grid.Row="0" Grid.Column="2" Text="Faces" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
             <!-- SUBCONTENT -->
-            <ListBox Grid.Row="1" Grid.Column="0" x:Name="listBoxPersonGroups" ItemsSource="{x:Bind ViewModel.PersonGroups}" DisplayMemberPath="Name" SelectedItem="{x:Bind ViewModel.SelectedPersonGroup, Mode=OneWay}" SelectionChanged="{x:Bind ViewModel.OnPersonGroupChanged}"/>
-            <ListBox Grid.Row="1" Grid.Column="1" x:Name="listBoxPersons" ItemsSource="{x:Bind ViewModel.Persons}" DisplayMemberPath="Name" SelectionChanged="{x:Bind ViewModel.OnPersonChanged}"/>
+            <ListBox Grid.Row="1" Grid.Column="0" x:Name="listBoxPersonGroups" ItemsSource="{x:Bind ViewModel.PersonGroups, Mode=OneWay}" DisplayMemberPath="Name" SelectionMode="Single" SelectedItem="{x:Bind ViewModel.SelectedPersonGroup, Mode=TwoWay, Converter={StaticResource selectedItemConverter}}" SelectionChanged="{x:Bind ViewModel.OnPersonGroupChanged}" />
+            <ListBox Grid.Row="1" Grid.Column="1" x:Name="listBoxPersons" ItemsSource="{x:Bind ViewModel.Persons}" DisplayMemberPath="Name" SelectionMode="Single" SelectedItem="{x:Bind ViewModel.SelectedPerson, Mode=TwoWay, Converter={StaticResource selectedItemConverter}}" SelectionChanged="{x:Bind ViewModel.OnPersonChanged}"/>
             <TextBlock Grid.Row="1" Grid.Column="2" x:Name="countOfFaces" Text="{x:Bind ViewModel.CountOfFaces, Mode=TwoWay}" />
-            <!--<ListView ItemsSource="{x:Bind ViewModel.PersonFaces}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Image 
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>-->
         </Grid>
 
         <!--  Adaptive triggers  -->

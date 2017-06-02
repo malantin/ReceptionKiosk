@@ -112,9 +112,6 @@
   <ItemGroup>
     <Compile Include="Activation\ActivationHandler.cs" />
     <Compile Include="Controls\Converters.cs" />
-    <Compile Include="Controls\ImageWithCancel.xaml.cs">
-      <DependentUpon>ImageWithCancel.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\ReceptionCamera.xaml.cs">
       <DependentUpon>ReceptionCamera.xaml</DependentUpon>
     </Compile>
@@ -129,6 +126,7 @@
     <Compile Include="Services\ActivationService.cs" />
     <Compile Include="Activation\DefaultLaunchActivationHandler.cs" />
     <Compile Include="Services\APISettingsService.cs" />
+    <Compile Include="Services\MessageDialogHelper.cs" />
     <Compile Include="Services\NavigationService.cs" />
     <Compile Include="Services\OnBackgroundEnteringEventArgs.cs" />
     <Compile Include="Services\SuspendAndResumeService.cs" />
@@ -239,10 +237,6 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Controls\ImageWithCancel.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Controls\ReceptionCamera.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

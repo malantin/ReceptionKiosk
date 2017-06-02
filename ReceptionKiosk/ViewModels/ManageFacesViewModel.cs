@@ -6,7 +6,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Controls;
 
@@ -15,16 +14,26 @@ namespace ReceptionKiosk.ViewModels
     public class ManageFacesViewModel : Observable
     {
         /// <summary>
-        /// FaceServiceClient Instanz
+        /// FaceServiceClient Instance
         /// </summary>
         private FaceServiceClient faceService { get; set; }
 
         #region Commands
 
         /// <summary>
-        /// Button Gruppe hinzufuegen
+        /// Add Group Command
         /// </summary>
-        public ICommand AddGroupCommand { get; private set; }
+        public RelayCommand AddGroupCommand { get; private set; }
+
+        /// <summary>
+        /// Add Person Command
+        /// </summary>
+        public RelayCommand AddPersonCommand { get; private set; }
+
+        /// <summary>
+        /// Delete Command
+        /// </summary>
+        public RelayCommand DeleteCommand { get; private set; }
 
         #endregion //Commands
 
@@ -56,20 +65,25 @@ namespace ReceptionKiosk.ViewModels
             set { Set(ref _isLoading, value); }
         }
 
-        //TODO: Später an UI_Element binden
         private PersonGroup _selectedPersonGroup;
         public PersonGroup SelectedPersonGroup
         {
             get { return _selectedPersonGroup; }
-            set { Set(ref _selectedPersonGroup, value); }
+            set { Set(ref _selectedPersonGroup, value); DeleteCommand.OnCanExecuteChanged(); }
         }
 
-        //TODO: Später an UI_Element binden
         private Person _selectedPerson;
         public Person SelectedPerson
         {
             get { return _selectedPerson; }
-            set { Set(ref _selectedPerson, value); }
+            set { Set(ref _selectedPerson, value); DeleteCommand.OnCanExecuteChanged(); }
+        }
+
+        private PersonGroup _selectedGroupToAddPerson;
+        public PersonGroup SelectedGroupToAddPerson
+        {
+            get { return _selectedGroupToAddPerson; }
+            set { Set(ref _selectedGroupToAddPerson, value); AddPersonCommand.OnCanExecuteChanged(); }
         }
 
         private string _countOfFaces;
@@ -83,9 +97,15 @@ namespace ReceptionKiosk.ViewModels
         public string GroupToAdd
         {
             get { return _groupToAdd; }
-            set { Set(ref _groupToAdd, value); }
+            set { Set(ref _groupToAdd, value); AddGroupCommand.OnCanExecuteChanged(); }
         }
 
+        private string _personToAdd;
+        public string PersonToAdd
+        {
+            get { return _personToAdd; }
+            set { Set(ref _personToAdd, value); }
+        }
 
         #endregion //Properties
 
@@ -94,13 +114,16 @@ namespace ReceptionKiosk.ViewModels
         /// </summary>
         public ManageFacesViewModel()
         {
-            //ObservableCollection initialisieren
+            //ObservableCollection initialize
             PersonGroups = new ObservableCollection<PersonGroup>();
             Persons = new ObservableCollection<Person>();
             PersonFaces = new ObservableCollection<PersonFace>();
 
-            //Command initialisieren
-            AddGroupCommand = new RelayCommand(async () => await ExecuteAddGroupCommandAsync(), CanExecuteAddGroupCommand);
+            //Command initialize
+            AddGroupCommand = new RelayCommand(async () => await ExecuteAddGroupCommandAsync(), CanExecuteAddGroupCommandAsync);
+            AddPersonCommand = new RelayCommand(async () => await ExecuteAddPersonCommandAsync(), CanExecuteAddPersonCommandAsync);
+
+            DeleteCommand = new RelayCommand(async () => await ExecuteDeleteCommandAsync(), CanExecuteDeleteCommandAsync);
         }
 
         #region AddGroupCommand
@@ -112,7 +135,11 @@ namespace ReceptionKiosk.ViewModels
                     throw new ArgumentNullException(nameof(GroupToAdd), "Please enter a group name.");
 
                 await faceService.CreatePersonGroupAsync(Guid.NewGuid().ToString(), GroupToAdd);
-                await (new MessageDialog("Your group is added.")).ShowAsync();
+                await (new MessageDialog($"'{GroupToAdd}' successfully added.")).ShowAsync();
+
+                //Cleanup UI
+                GroupToAdd = string.Empty;
+                await LoadGroupsAsync();
             }
             catch (Exception ex)
             {
@@ -121,35 +148,105 @@ namespace ReceptionKiosk.ViewModels
             }
         }
 
-        private bool CanExecuteAddGroupCommand()
+        private bool CanExecuteAddGroupCommandAsync()
         {
-            return !string.IsNullOrEmpty(GroupToAdd);
+            //TODO: Only for developement reasons
+            //return !string.IsNullOrEmpty(GroupToAdd);
+            return true;
         }
         #endregion //AddGroupCommand
+
+        #region AddPersonCommand
+        private async Task ExecuteAddPersonCommandAsync()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(PersonToAdd))
+                    throw new ArgumentNullException(nameof(GroupToAdd), "Please enter a person name.");
+
+                if (SelectedGroupToAddPerson == null)
+                    throw new ArgumentNullException(nameof(SelectedGroupToAddPerson), "Please select a group.");
+
+                await faceService.CreatePersonAsync(SelectedGroupToAddPerson.PersonGroupId, PersonToAdd);
+                await MessageDialogHelper.MessageDialogAsync($"'{PersonToAdd}' successfully added.");
+
+                //Cleanup UI
+                PersonToAdd = string.Empty;
+                if (SelectedPersonGroup != null) //Load Persons if some selected a group
+                    await LoadPersonsOfGroupAsync(SelectedPersonGroup.PersonGroupId);
+            }
+            catch (Exception ex)
+            {
+                var dialog = new MessageDialog(ex.Message, "Fehler");
+                await dialog.ShowAsync();
+            }
+        }
+
+        private bool CanExecuteAddPersonCommandAsync()
+        {
+            return SelectedGroupToAddPerson != null;
+        }
+        #endregion //AddPersonCommand
+
+        #region DeleteCommand
+        private async Task ExecuteDeleteCommandAsync()
+        {
+            if (SelectedPersonGroup != null)
+            {
+                if (SelectedPerson != null)
+                {
+                    await MessageDialogHelper.ConfirmDialogAsync("Deleting Person",
+                                                                $"Are you sure you want to delete '{SelectedPerson.Name}'?",
+                                                                async () =>
+                                                                {
+                                                                    await faceService.DeletePersonAsync(SelectedPersonGroup.PersonGroupId, SelectedPerson.PersonId);
+                                                                    await MessageDialogHelper.MessageDialogAsync("Deleting Person", $"'{SelectedPerson.Name}' successfully deleted.");
+                                                                },
+                                                                async () => await MessageDialogHelper.MessageDialogAsync("Deleting Person", "Deleting was canceled by user."));
+
+                    //Cleanup
+                    SelectedPerson = null;
+                    await LoadPersonsOfGroupAsync(SelectedPersonGroup.PersonGroupId);
+                }
+                else
+                {
+                    //Delete PersonGroup
+                    await MessageDialogHelper.ConfirmDialogAsync("Deleting Group",
+                                                                $"Are you sure you want to delete '{SelectedPersonGroup.Name}'?",
+                                                                async () =>
+                                                                    {
+                                                                        await faceService.DeletePersonGroupAsync(SelectedPersonGroup.PersonGroupId);
+                                                                        await MessageDialogHelper.MessageDialogAsync("Deleting Group", $"'{SelectedPersonGroup.Name}' successfully deleted.");
+                                                                    },
+                                                                async () => await MessageDialogHelper.MessageDialogAsync("Deleting Group", "Deleting was canceled by user."));
+
+                    //Cleanup
+                    SelectedPersonGroup = null;
+                    await LoadGroupsAsync();
+                }
+            }
+        }
+
+        private bool CanExecuteDeleteCommandAsync()
+        {
+            return SelectedPersonGroup != null || SelectedPerson != null;
+        }
+        #endregion //DeleteCommand
+
+        #region OnChangedEvents
 
         public async void OnPersonGroupChanged(object sender, SelectionChangedEventArgs args)
         {
             try
             {
-                var listBoxPersonGroup = sender as ListBox;
-
-                if (listBoxPersonGroup?.SelectedItem != null)
-                {
-                    if (listBoxPersonGroup.SelectedItem is PersonGroup)
-                    {
-                        SelectedPersonGroup = listBoxPersonGroup.SelectedItem as PersonGroup;
-                        if (SelectedPersonGroup != null)
-                        {
-                            var persons = await faceService.ListPersonsAsync(SelectedPersonGroup.PersonGroupId);
-                            persons.ForEach(p => Persons.Add(p));
-                        }
-                    }
-                }
+                if (SelectedPersonGroup != null)
+                    await LoadPersonsOfGroupAsync(SelectedPersonGroup.PersonGroupId);
+                else
+                    await MessageDialogHelper.MessageDialogAsync("Didn't select a group, please try again later.");
             }
             catch (Exception ex)
             {
-                var dialog = new MessageDialog(ex.Message, "Fehler");
-                await dialog.ShowAsync();
+                await MessageDialogHelper.MessageDialogAsync("Exception", ex.Message);
             }
         }
 
@@ -157,32 +254,18 @@ namespace ReceptionKiosk.ViewModels
         {
             try
             {
-                var listBoxPerson = sender as ListBox;
-
-                if (listBoxPerson?.SelectedItem != null)
-                {
-                    if (listBoxPerson.SelectedItem is Person)
-                    {
-                        SelectedPerson = listBoxPerson.SelectedItem as Person;
-                        if (SelectedPerson != null)
-                        {
-                            ////TODO: Muss noch implementiert werden
-                            //foreach (Guid faceId in SelectedPerson.PersistedFaceIds)
-                            //{
-                            //    var personFace = await fsc.GetPersonFaceAsync(SelectedPersonGroup.PersonGroupId, SelectedPerson.PersonId, faceId);
-                            //    PersonFaces.Add(personFace);
-                            //}
-                            CountOfFaces = $"{SelectedPerson.PersistedFaceIds.Count()} trained faces.";
-                        }
-                    }
-                }
+                if (SelectedPerson != null)
+                    CountOfFaces = $"{SelectedPerson.PersistedFaceIds.Count()} trained faces.";
+                else
+                    CountOfFaces = "Please select a person.";
             }
             catch (Exception ex)
             {
-                var dialog = new MessageDialog(ex.Message, "Fehler");
-                await dialog.ShowAsync();
+                await MessageDialogHelper.MessageDialogAsync("Exception", ex.Message);
             }
         }
+
+        #endregion //OnChangedEvents
 
         public async Task InitializeAsync()
         {
@@ -191,11 +274,33 @@ namespace ReceptionKiosk.ViewModels
             if (faceService == null)
                 faceService = await FaceServiceHelper.CreateNewFaceServiceAsync();
 
-            var personGroups = await faceService.ListPersonGroupsAsync();
-            personGroups.OrderBy(pg => pg.Name);
-            personGroups.ForEach(pg => PersonGroups.Add(pg));
+            await LoadGroupsAsync();
 
             IsLoading = false;
+        }
+
+        /// <summary>
+        /// Loads groups and cleanup the ObservableCollection
+        /// </summary>
+        /// <returns></returns>
+        private async Task LoadGroupsAsync()
+        {
+            PersonGroups.Clear();
+
+            var fscPersonGroups = await faceService.ListPersonGroupsAsync();
+            fscPersonGroups.OrderBy(pg => pg.Name).ForEach(pg => PersonGroups.Add(pg));
+        }
+
+        /// <summary>
+        /// Loads persons and cleanup ObservableCollection
+        /// </summary>
+        /// <returns></returns>
+        private async Task LoadPersonsOfGroupAsync(string groupID)
+        {
+            Persons.Clear();
+
+            var persons = await faceService.ListPersonsAsync(groupID);
+            persons.OrderBy(p => p.Name).ForEach(p => Persons.Add(p));
         }
     }
 }

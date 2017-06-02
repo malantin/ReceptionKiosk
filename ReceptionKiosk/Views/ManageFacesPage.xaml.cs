@@ -12,6 +12,14 @@ namespace ReceptionKiosk.Views
         public ManageFacesPage()
         {
             InitializeComponent();
+
+            //Fixed: Textbox can't focused
+            //Further Informations: https://stackoverflow.com/questions/39096758/cant-enter-enter-text-in-textbox-control-inside-flyout
+            if (Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.FrameworkElement", "AllowFocusOnInteraction"))
+            {
+                openAddFlyoutButton.AllowFocusOnInteraction = true;
+                openDeleteFlyoutButton.AllowFocusOnInteraction = true;
+            }
         }
 
         protected async override void OnNavigatedTo(NavigationEventArgs e)
