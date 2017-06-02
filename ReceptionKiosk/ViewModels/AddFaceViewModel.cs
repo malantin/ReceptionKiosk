@@ -38,6 +38,8 @@ namespace ReceptionKiosk.ViewModels
 
         public ICommand BrowsePictureCommand { get; set; }
 
+        public ICommand RemoveImageCommand { get; set; }
+
         #endregion //Commands
 
         #region Properties
@@ -82,7 +84,18 @@ namespace ReceptionKiosk.ViewModels
 
             AddPersonCommand = new RelayCommand(async () => await ExecuteAddPersonCommand());
             BrowsePictureCommand = new RelayCommand(async () => await ExecuteBrowsePictureCommandAsync());
+            RemoveImageCommand = new RelayCommand(async () => await ExecuteRemoveImageCommand());
         }
+
+        /// <summary>
+        /// Removes images from list
+        /// </summary>
+        /// <returns></returns>
+        private Task ExecuteRemoveImageCommand()
+        {
+            throw new NotImplementedException();
+        }
+
 
         #region BrowsePictureCommand
 
@@ -96,7 +109,7 @@ namespace ReceptionKiosk.ViewModels
                 fileOpenPicker.FileTypeFilter.Add(".png");
                 fileOpenPicker.FileTypeFilter.Add(".bmp");
                 IReadOnlyList<StorageFile> selectedFiles = await fileOpenPicker.PickMultipleFilesAsync();
-                
+
                 if (selectedFiles != null)
                 {
                     foreach (var item in selectedFiles)
@@ -119,7 +132,7 @@ namespace ReceptionKiosk.ViewModels
 
                             //var result = await FaceService.AddPersonFaceAsync(SelectedPersonGroup.PersonGroupId, new Guid("6aa5f65d-1cb6-497d-b692-9da56b33658d"), iostream);
 
-                            
+
                             // Create the decoder from the stream
                             BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream);
 
@@ -163,6 +176,7 @@ namespace ReceptionKiosk.ViewModels
         {
             if (NewFaceName != string.Empty && Pictures.Count > 0 && SelectedPersonGroup != null)
             {
+                IsLoading = true;
                 try
                 {
                     List<AddPersistedFaceResult> faces = new List<AddPersistedFaceResult>();
@@ -186,20 +200,24 @@ namespace ReceptionKiosk.ViewModels
                         faces.Add(await FaceService.AddPersonFaceAsync(SelectedPersonGroup.PersonGroupId, result.PersonId, stream));
                     }
 
-                    string msg = "";
+                    await new MessageDialog($"Successfully added {faces.Count} faces for person {NewFaceName} ({result.PersonId}).").ShowAsync();
 
-                    foreach (var face in faces)
-                    {
-                        msg += face.PersistedFaceId;
-                    }
+                    //Reset the form
+                    Pictures.Clear();
+                    NewFaceName = "";
                 }
                 catch (FaceAPIException e)
                 {
                     await new MessageDialog(e.ErrorMessage).ShowAsync();
                     //await new MessageDialog(loader.GetString("AddFace_CompleteInformation")).ShowAsync();
                 }
+                finally
+                {
+                    IsLoading = false;
+                }
             }
-            else {
+            else
+            {
                 await new MessageDialog(loader.GetString("AddFace_CompleteInformation")).ShowAsync();
             }
         }

@@ -45,8 +45,9 @@
                             <DataTemplate>
                                 <StackPanel>
                                     <Image Height="100" Width="100" Source="{Binding Path=BitmapSource}"/>
-                                    <AppBarButton Content="Delete" Icon="Delete" Label="Delete" />
+                                    <AppBarButton Content="Delete" Icon="Delete" Label="Delete" Command="{Binding Path=ViewModel.RemoveImageCommand}" />
                                 </StackPanel>
+                                
                             </DataTemplate>
                         </GridView.ItemTemplate>
 
