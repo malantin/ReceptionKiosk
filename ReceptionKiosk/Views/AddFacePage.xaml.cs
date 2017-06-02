@@ -18,6 +18,8 @@ namespace ReceptionKiosk.Views
 
             //Hand reference to picture library to camera control to add photos
             cameraControl.SetPictureLib(ViewModel.Pictures);
+
+            DataContext = ViewModel;
         }
 
         private void Current_EnteredBackground(object sender, EnteredBackgroundEventArgs e)
@@ -49,5 +51,6 @@ namespace ReceptionKiosk.Views
                 deferral.Complete();
             }
         }
+
     }
 }

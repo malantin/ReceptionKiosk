@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReceptionKiosk.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -37,9 +38,9 @@ namespace ReceptionKiosk.Controls
     {
         public MediaCapture _mediaCapture;
 
-        ObservableCollection<SoftwareBitmapSource> _pictures;
+        ObservableCollection<BitmapWrapper> _pictures;
 
-        public ObservableCollection<SoftwareBitmapSource> Pictures { get { return _pictures; } set { _pictures = value; } }
+        public ObservableCollection<BitmapWrapper> Pictures { get { return _pictures; } set { _pictures = value; } }
 
         //Is the camera preview active?
         private bool _isPreviewing;
@@ -265,11 +266,14 @@ namespace ReceptionKiosk.Controls
                     encoder.SetSoftwareBitmap(softwareBitmap);
                     await encoder.FlushAsync();
 
-                    softwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
-                    var softwareBitmapSource = new SoftwareBitmapSource();
-                    await softwareBitmapSource.SetBitmapAsync(softwareBitmap);
-
-                    Pictures.Add(softwareBitmapSource);
+                    // Create SoftwareBitmapSource and save to Pictures collection if available
+                    if (Pictures != null)
+                    {
+                        softwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+                        var softwareBitmapSource = new SoftwareBitmapSource();
+                        await softwareBitmapSource.SetBitmapAsync(softwareBitmap);
+                        Pictures.Add(new BitmapWrapper(softwareBitmap, softwareBitmapSource));
+                    }                    
                 }
 
                 //using (var captureStream = new InMemoryRandomAccessStream())
@@ -305,7 +309,7 @@ namespace ReceptionKiosk.Controls
             return null;
         }
 
-        internal void SetPictureLib(ObservableCollection<SoftwareBitmapSource> pictures)
+        internal void SetPictureLib(ObservableCollection<BitmapWrapper> pictures)
         {
             Pictures = pictures;
         }
