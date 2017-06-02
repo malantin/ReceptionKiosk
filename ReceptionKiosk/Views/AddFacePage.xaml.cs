@@ -14,6 +14,12 @@ namespace ReceptionKiosk.Views
         {
             InitializeComponent();
             Application.Current.Suspending += Application_Suspending;
+            Application.Current.EnteredBackground += Current_EnteredBackground;
+        }
+
+        private void Current_EnteredBackground(object sender, EnteredBackgroundEventArgs e)
+        {
+            cameraControl.Reset();
         }
 
         protected async override void OnNavigatedTo(NavigationEventArgs e)
@@ -27,6 +33,8 @@ namespace ReceptionKiosk.Views
         {
             await cameraControl.CleanupCameraAsync();
         }
+
+        
 
         private async void Application_Suspending(object sender, SuspendingEventArgs e)
         {

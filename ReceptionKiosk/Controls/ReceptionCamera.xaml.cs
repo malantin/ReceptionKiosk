@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -30,22 +31,39 @@ using Windows.UI.Xaml.Navigation;
 
 namespace ReceptionKiosk.Controls
 {
-    public sealed partial class ReceptionCamera : UserControl
+    public sealed partial class ReceptionCamera : UserControl, INotifyPropertyChanged
     {
-        MediaCapture _mediaCapture;
-        bool _isPreviewing;
-        DisplayRequest _displayRequest = new DisplayRequest();
+        public MediaCapture _mediaCapture;
+
+        //Is the camera preview active?
+        private bool _isPreviewing;
+
+        private DisplayRequest _displayRequest = new DisplayRequest();
         private SemaphoreSlim frameProcessingSemaphore = new SemaphoreSlim(1);
+
+        public bool IsPreviewing
+        {
+            get { return _isPreviewing;}
+            set { _isPreviewing = value; OnPropertyChanged("IsPreviewing"); }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public int CameraResolutionWidth { get; private set; }
         public int CameraResolutionHeight { get; private set; }
-        public double CameraAspectRatio { get; set; }
+        public double CameraAspectRatio { get; set; }    
 
         public ReceptionCamera()
         {
             this.InitializeComponent();
-            photoButton.IsEnabled = false;
+            IsPreviewing = false;
         }
 
+        void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        /// <summary>
+        /// Hides the grid that contains the preview and photo button
+        /// </summary>
         public void HideCameraControls()
         {
             this.commandBar.Visibility = Visibility.Collapsed;
@@ -53,15 +71,14 @@ namespace ReceptionKiosk.Controls
 
         public async Task StartPreviewAsync()
         {
+            IsPreviewing = true;
             try
             {
-
                 _mediaCapture = new MediaCapture();
                 await _mediaCapture.InitializeAsync();
 
                 _displayRequest.RequestActive();
                 DisplayInformation.AutoRotationPreferences = DisplayOrientations.Landscape;
-                photoButton.IsEnabled = true;
             }
             catch (UnauthorizedAccessException)
             {
@@ -74,38 +91,22 @@ namespace ReceptionKiosk.Controls
             {
                 CameraPreview.Source = _mediaCapture;
                 await _mediaCapture.StartPreviewAsync();
-                _isPreviewing = true;
             }
             catch (System.IO.FileLoadException)
             {
-                //_mediaCapture.CaptureDeviceExclusiveControlStatusChanged += _mediaCapture_CaptureDeviceExclusiveControlStatusChanged;
+                //TODO Handle the exception
             }
 
         }
-
-        //private async void _mediaCapture_CaptureDeviceExclusiveControlStatusChanged(MediaCapture sender, MediaCaptureDeviceExclusiveControlStatusChangedEventArgs args)
-        //{
-        //    if (args.Status == MediaCaptureDeviceExclusiveControlStatus.SharedReadOnlyAvailable)
-        //    {
-        //        ShowMessageToUser("The camera preview can't be displayed because another app has exclusive access");
-        //    }
-        //    else if (args.Status == MediaCaptureDeviceExclusiveControlStatus.ExclusiveControlAvailable && !_isPreviewing)
-        //    {
-        //        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
-        //        {
-        //            await StartPreviewAsync();
-        //        });
-        //    }
-        //}
 
         public async Task CleanupCameraAsync()
         {
             if (_mediaCapture != null)
             {
-                if (_isPreviewing)
+                if (IsPreviewing)
                 {
                     await _mediaCapture.StopPreviewAsync();
-                    _isPreviewing = false;
+                    IsPreviewing = false;
                 }
 
                 await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
@@ -123,20 +124,30 @@ namespace ReceptionKiosk.Controls
 
         }
 
+        /// <summary>
+        /// Display a dialog if access to the camera was denied
+        /// </summary>
+        /// <returns></returns>
         private async Task ShowNoCameraAccessDialogAsync()
         {
             ContentDialog noCameraAccess = new ContentDialog()
             {
                 Title = "No access to camera",
-                Content = "This app needs to access the default camera."
+                Content = "This app needs to access the default camera.",
+                PrimaryButtonText = "OK"
             };
 
             await noCameraAccess.ShowAsync();
         }
 
+        /// <summary>
+        /// Starts the camera preview on the capture element
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void PreviewButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!_isPreviewing)
+            if (!IsPreviewing)
             {
                 try
                 {
@@ -148,16 +159,16 @@ namespace ReceptionKiosk.Controls
                     await new MessageDialog(ex.Message).ShowAsync();
                 }
             }
-            else
-            {
-
-            }
         }
 
-
+        /// <summary>
+        /// Handles the camera button click to take a picture
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void CameraControlButtonClick(object sender, RoutedEventArgs e)
         {
-            if (this.cameraControlSymbol.Symbol == Symbol.Camera)
+            if (IsPreviewing)
             {
                 var img = await CaptureFrameAsync();
                 if (img != null)
@@ -167,10 +178,15 @@ namespace ReceptionKiosk.Controls
             }
             else
             {
-                //this.cameraControlSymbol.Symbol = Symbol.Camera;
-
                 await StartPreviewAsync();
             }
+        }
+
+        public void Reset()
+        {
+            IsPreviewing = false;
+            CameraPreview.Source = null;
+            previewButton.IsEnabled = true;
         }
 
         //private async Task SetVideoEncodingToHighestResolution()
@@ -193,6 +209,11 @@ namespace ReceptionKiosk.Controls
         //    }
         //}
 
+        
+        /// <summary>
+        /// Captures a frame from the camera preview and saves the photo
+        /// </summary>
+        /// <returns></returns>
         public async Task<Uri> CaptureFrameAsync()
         {
             try
@@ -246,7 +267,7 @@ namespace ReceptionKiosk.Controls
             }
             catch (Exception ex)
             {
-
+                //TODO Handle the exception
             }
             finally
             {

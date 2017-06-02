@@ -5,10 +5,13 @@
     xmlns:local="using:ReceptionKiosk.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ctl="using:ReceptionKiosk.Controls"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
-
+    <UserControl.Resources>
+        <ctl:BooleanToVisibilityConverter x:Key="booltovisiblity" />
+    </UserControl.Resources>
     <Grid x:Name="cameraHostGrid" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.2*"/>
@@ -20,13 +23,13 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <CaptureElement Grid.Column="1" Name="CameraPreview" Stretch="None" Height="auto" />
+        <CaptureElement Grid.Column="1" Name="CameraPreview" Stretch="None" Height="auto" Visibility="{x:Bind IsPreviewing, Converter={StaticResource booltovisiblity}, Mode=OneWay}"/>
         <Grid x:Name="commandBar" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="2" Grid.Row="1" Grid.Column="1" Padding="10">
             <StackPanel Orientation="Horizontal">
-                <Button x:Name="previewButton" Margin="1" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="#FF222222" BorderBrush="Transparent" Click="PreviewButtonClick" >
+                <Button x:Name="previewButton" Margin="1" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="#FF222222" BorderBrush="Transparent" Click="PreviewButtonClick">
                     <SymbolIcon x:Name="startVideoSymbol" Margin="6" Symbol="Target" Foreground="White"></SymbolIcon>
                 </Button>
-                <Button x:Name="photoButton" Margin="1" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="#FF222222" BorderBrush="Transparent" Click="CameraControlButtonClick" IsEnabled="False" >
+                <Button x:Name="photoButton" Margin="1" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="#FF222222" BorderBrush="Transparent" Click="CameraControlButtonClick" IsEnabled="{x:Bind Mode=OneWay, Path=IsPreviewing}" >
                     <SymbolIcon x:Name="cameraControlSymbol" Margin="6" Symbol="Camera" Foreground="White"></SymbolIcon>
                 </Button>
             </StackPanel>
