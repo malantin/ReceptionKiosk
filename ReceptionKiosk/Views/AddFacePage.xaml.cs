@@ -15,6 +15,9 @@ namespace ReceptionKiosk.Views
             InitializeComponent();
             Application.Current.Suspending += Application_Suspending;
             Application.Current.EnteredBackground += Current_EnteredBackground;
+
+            //Hand reference to picture library to camera control to add photos
+            cameraControl.SetPictureLib(ViewModel.Pictures);
         }
 
         private void Current_EnteredBackground(object sender, EnteredBackgroundEventArgs e)

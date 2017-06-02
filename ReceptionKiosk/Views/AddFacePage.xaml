@@ -35,14 +35,14 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <ctl:ReceptionCamera x:Name="cameraControl" Grid.Column="0"></ctl:ReceptionCamera>
+                <ctl:ReceptionCamera x:Name="cameraControl" Grid.Column="0" Margin="10"></ctl:ReceptionCamera>
 
                 <StackPanel Orientation="Vertical" Grid.Column="1" Padding="20" Width="auto">
                     <TextBox Header="Name" Text="{x:Bind ViewModel.NewFaceName, Mode=TwoWay}" />
                     <ComboBox Header="Group" Name="groupBox" ItemsSource="{x:Bind ViewModel.PersonGroups, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedPersonGroup, Mode=OneWay}" SelectedValuePath="PersonGroupId" DisplayMemberPath="Name" />
                     <GridView Margin="5" ItemsSource="{x:Bind ViewModel.Pictures}" SelectionMode="None">
                         <GridView.ItemTemplate>
-                            <DataTemplate x:DataType="BitmapImage">
+                            <DataTemplate x:DataType="SoftwareBitmapSource">
                                 <StackPanel>
                                     <Image Height="100" Width="100" Source="{x:Bind}"/>
                                     <AppBarButton Content="Delete" Icon="Delete" Label="Delete"/>

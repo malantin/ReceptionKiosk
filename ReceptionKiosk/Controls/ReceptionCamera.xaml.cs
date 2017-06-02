@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -25,6 +26,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
@@ -34,6 +36,10 @@ namespace ReceptionKiosk.Controls
     public sealed partial class ReceptionCamera : UserControl, INotifyPropertyChanged
     {
         public MediaCapture _mediaCapture;
+
+        ObservableCollection<SoftwareBitmapSource> _pictures;
+
+        public ObservableCollection<SoftwareBitmapSource> Pictures { get { return _pictures; } set { _pictures = value; } }
 
         //Is the camera preview active?
         private bool _isPreviewing;
@@ -214,7 +220,7 @@ namespace ReceptionKiosk.Controls
         /// Captures a frame from the camera preview and saves the photo
         /// </summary>
         /// <returns></returns>
-        public async Task<Uri> CaptureFrameAsync()
+        public async Task<SoftwareBitmap> CaptureFrameAsync()
         {
             try
             {
@@ -244,26 +250,48 @@ namespace ReceptionKiosk.Controls
                 var myPictures = await Windows.Storage.StorageLibrary.GetLibraryAsync(Windows.Storage.KnownLibraryId.Pictures);
                 StorageFile file = await myPictures.SaveFolder.CreateFileAsync($"photo-{DateTime.Now.ToString("yyyy-MM-dd-hh-m-s")}.jpg", CreationCollisionOption.GenerateUniqueName);
 
-                using (var captureStream = new InMemoryRandomAccessStream())
+                var lowLagCapture = await _mediaCapture.PrepareLowLagPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Bgra8));
+
+                var capturedPhoto = await lowLagCapture.CaptureAsync();
+                var softwareBitmap = capturedPhoto.Frame.SoftwareBitmap;
+
+                await lowLagCapture.FinishAsync();
+
+                //Save image to disk
+                using (var filestream = await file.OpenAsync(FileAccessMode.ReadWrite))
                 {
-                    await _mediaCapture.CapturePhotoToStreamAsync(ImageEncodingProperties.CreateJpeg(), captureStream);
+                    // Create an encoder with the desired format
+                    BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, filestream);
+                    encoder.SetSoftwareBitmap(softwareBitmap);
+                    await encoder.FlushAsync();
 
-                    using (var fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
-                    {
-                        var decoder = await BitmapDecoder.CreateAsync(captureStream);
-                        var encoder = await BitmapEncoder.CreateForTranscodingAsync(fileStream, decoder);
+                    softwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+                    var softwareBitmapSource = new SoftwareBitmapSource();
+                    await softwareBitmapSource.SetBitmapAsync(softwareBitmap);
 
-                        var properties = new BitmapPropertySet
-                        {
-                            { "System.Photo.Orientation", new BitmapTypedValue(PhotoOrientation.Normal, PropertyType.UInt16) }
-                         };
-                        await encoder.BitmapProperties.SetPropertiesAsync(properties);
-
-                        await encoder.FlushAsync();
-                    }
+                    Pictures.Add(softwareBitmapSource);
                 }
 
-                return new Uri(file.Path);
+                //using (var captureStream = new InMemoryRandomAccessStream())
+                //{
+                //    await _mediaCapture.CapturePhotoToStreamAsync(ImageEncodingProperties.CreateJpeg(), captureStream);
+
+                //    using (var fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
+                //    {
+                //        var decoder = await BitmapDecoder.CreateAsync(captureStream);
+                //        var encoder = await BitmapEncoder.CreateForTranscodingAsync(fileStream, decoder);
+
+                //        var properties = new BitmapPropertySet
+                //        {
+                //            { "System.Photo.Orientation", new BitmapTypedValue(PhotoOrientation.Normal, PropertyType.UInt16) }
+                //         };
+                //        await encoder.BitmapProperties.SetPropertiesAsync(properties);
+
+                //        await encoder.FlushAsync();
+                //    }
+                //}
+
+                return softwareBitmap;
             }
             catch (Exception ex)
             {
@@ -275,6 +303,11 @@ namespace ReceptionKiosk.Controls
             }
 
             return null;
+        }
+
+        internal void SetPictureLib(ObservableCollection<SoftwareBitmapSource> pictures)
+        {
+            Pictures = pictures;
         }
     }
 }

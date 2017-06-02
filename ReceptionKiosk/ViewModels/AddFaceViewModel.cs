@@ -7,8 +7,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.Storage.Streams;
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Media.Imaging;
 
@@ -60,14 +62,14 @@ namespace ReceptionKiosk.ViewModels
         public ObservableCollection<PersonGroup> PersonGroups { get; private set; }
 
         /// <summary>
-        /// Lieste aller Bilder
+        /// Liste aller Bilder
         /// </summary>
-        public ObservableCollection<BitmapImage> Pictures { get; private set; }
+        public ObservableCollection<SoftwareBitmapSource> Pictures { get; private set; }
 
         public AddFaceViewModel()
         {
             PersonGroups = new ObservableCollection<PersonGroup>();
-            Pictures = new ObservableCollection<BitmapImage>();
+            Pictures = new ObservableCollection<SoftwareBitmapSource>();
 
             AddPersonCommand = new RelayCommand(async () => await ExecuteAddPersonCommand());
             BrowsePictureCommand = new RelayCommand(async () => await ExecuteBrowsePictureCommandAsync());
@@ -90,12 +92,29 @@ namespace ReceptionKiosk.ViewModels
                 {
                     foreach (var item in selectedFiles)
                     {
-                        var bitmap = new BitmapImage();
-                        using (var stream = await item.OpenReadAsync())
+                        SoftwareBitmap softwareBitmap;
+
+                        using (IRandomAccessStream stream = await item.OpenAsync(FileAccessMode.Read))
                         {
-                            await bitmap.SetSourceAsync(stream);
-                            Pictures.Add(bitmap);
+                            // Create the decoder from the stream
+                            BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream);
+
+                            // Get the SoftwareBitmap representation of the file
+                            softwareBitmap = await decoder.GetSoftwareBitmapAsync();
+
+                            softwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+                            var softwareBitmapSource = new SoftwareBitmapSource();
+                            await softwareBitmapSource.SetBitmapAsync(softwareBitmap);
+
+                            Pictures.Add(softwareBitmapSource);
                         }
+
+                        //var bitmap = new SoftwareBitmap()
+                        //using (var stream = await item.OpenReadAsync())
+                        //{
+                        //    await bitmap.SetSourceAsync(stream);
+                        //    Pictures.Add(bitmap);
+                        //}
                     }
                 }
             }
