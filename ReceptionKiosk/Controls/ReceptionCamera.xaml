@@ -23,7 +23,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <CaptureElement Grid.Column="1" Name="CameraPreview" Stretch="None" Height="auto" Visibility="{x:Bind IsPreviewing, Converter={StaticResource booltovisiblity}, Mode=OneWay}"/>
+        <CaptureElement Grid.Column="1" Name="CameraPreview" Stretch="UniformToFill" Height="auto" Visibility="{x:Bind IsPreviewing, Converter={StaticResource booltovisiblity}, Mode=OneWay}"/>
         <Grid x:Name="commandBar" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="2" Grid.Row="1" Grid.Column="1" Padding="10">
             <StackPanel Orientation="Horizontal">
                 <Button x:Name="previewButton" Margin="1" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="#FF222222" BorderBrush="Transparent" Click="PreviewButtonClick">

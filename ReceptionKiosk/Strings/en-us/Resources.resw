@@ -171,4 +171,10 @@
   <data name="AddFace_CompleteInformation" xml:space="preserve">
     <value>Please make sure you have set a name, selected a group and added at least one photo.</value>
   </data>
+  <data name="CameraControl_NoAccessToCameraText" xml:space="preserve">
+    <value>This app needs to access the default camera.</value>
+  </data>
+  <data name="CameraControl_NoAccessToCameraTitle" xml:space="preserve">
+    <value>No access to camera</value>
+  </data>
 </root>

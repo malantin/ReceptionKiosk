@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
@@ -36,6 +37,11 @@ namespace ReceptionKiosk.Controls
 {
     public sealed partial class ReceptionCamera : UserControl, INotifyPropertyChanged
     {
+        /// <summary>
+        /// Resource loader for localized strings
+        /// </summary>
+        ResourceLoader loader = new Windows.ApplicationModel.Resources.ResourceLoader();
+
         public MediaCapture _mediaCapture;
 
         ObservableCollection<BitmapWrapper> _pictures;
@@ -48,6 +54,9 @@ namespace ReceptionKiosk.Controls
         private DisplayRequest _displayRequest = new DisplayRequest();
         private SemaphoreSlim frameProcessingSemaphore = new SemaphoreSlim(1);
 
+        /// <summary>
+        /// Is the camera preview active?
+        /// </summary>
         public bool IsPreviewing
         {
             get { return _isPreviewing;}
@@ -66,6 +75,21 @@ namespace ReceptionKiosk.Controls
             IsPreviewing = false;
         }
 
+        /// <summary>
+        /// Used to just display the camera preview with no buttons
+        /// </summary>
+        /// <param name="previewActive"></param>
+        /// <param name="controlsVisible"></param>
+        public ReceptionCamera(bool previewActive, bool controlsVisible)
+        {
+            this.InitializeComponent();
+            IsPreviewing = previewActive;
+            if (!controlsVisible)
+            {
+                HideCameraControls();
+            }
+        }
+
         void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         /// <summary>
@@ -76,6 +100,10 @@ namespace ReceptionKiosk.Controls
             this.commandBar.Visibility = Visibility.Collapsed;
         }
 
+        /// <summary>
+        /// Starts the media capture on the default camera and displays the video stream
+        /// </summary>
+        /// <returns></returns>
         public async Task StartPreviewAsync()
         {
             IsPreviewing = true;
@@ -85,6 +113,7 @@ namespace ReceptionKiosk.Controls
                 await _mediaCapture.InitializeAsync();
 
                 _displayRequest.RequestActive();
+                await SetVideoEncodingToHighestResolution();
                 DisplayInformation.AutoRotationPreferences = DisplayOrientations.Landscape;
             }
             catch (UnauthorizedAccessException)
@@ -106,6 +135,10 @@ namespace ReceptionKiosk.Controls
 
         }
 
+        /// <summary>
+        /// Stops the camera preview and releases all resources
+        /// </summary>
+        /// <returns></returns>
         public async Task CleanupCameraAsync()
         {
             if (_mediaCapture != null)
@@ -139,8 +172,8 @@ namespace ReceptionKiosk.Controls
         {
             ContentDialog noCameraAccess = new ContentDialog()
             {
-                Title = "No access to camera",
-                Content = "This app needs to access the default camera.",
+                Title = loader.GetString("CameraControl_NoAccessToCameraTitle"),
+                Content = loader.GetString("CameraControl_NoAccessToCameraText"),
                 PrimaryButtonText = "OK"
             };
 
@@ -189,6 +222,9 @@ namespace ReceptionKiosk.Controls
             }
         }
 
+        /// <summary>
+        /// Resets the control to the initial state
+        /// </summary>
         public void Reset()
         {
             IsPreviewing = false;
@@ -196,27 +232,27 @@ namespace ReceptionKiosk.Controls
             previewButton.IsEnabled = true;
         }
 
-        //private async Task SetVideoEncodingToHighestResolution()
-        //{
-        //    VideoEncodingProperties highestVideoEncodingSetting;
+        private async Task SetVideoEncodingToHighestResolution()
+        {
+            VideoEncodingProperties highestVideoEncodingSetting;
 
-        //    // Sort the available resolutions from highest to lowest
-        //    var availableResolutions = _mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview).Cast<VideoEncodingProperties>().OrderByDescending(v => v.Width * v.Height * (v.FrameRate.Numerator / v.FrameRate.Denominator));
+            // Sort the available resolutions from highest to lowest
+            var availableResolutions = _mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview).Cast<VideoEncodingProperties>().OrderByDescending(v => v.Width * v.Height * (v.FrameRate.Numerator / v.FrameRate.Denominator));
 
-        //    // Use the highest resolution
-        //    highestVideoEncodingSetting = availableResolutions.FirstOrDefault();
+            // Use the highest resolution
+            highestVideoEncodingSetting = availableResolutions.FirstOrDefault();
 
-        //    if (highestVideoEncodingSetting != null)
-        //    {
-        //        this.CameraAspectRatio = (double)highestVideoEncodingSetting.Width / (double)highestVideoEncodingSetting.Height;
-        //        this.CameraResolutionHeight = (int)highestVideoEncodingSetting.Height;
-        //        this.CameraResolutionWidth = (int)highestVideoEncodingSetting.Width;
+            if (highestVideoEncodingSetting != null)
+            {
+                this.CameraAspectRatio = (double)highestVideoEncodingSetting.Width / (double)highestVideoEncodingSetting.Height;
+                this.CameraResolutionHeight = (int)highestVideoEncodingSetting.Height;
+                this.CameraResolutionWidth = (int)highestVideoEncodingSetting.Width;
 
-        //        await _mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, highestVideoEncodingSetting);
-        //    }
-        //}
+                await _mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, highestVideoEncodingSetting);
+            }
+        }
 
-        
+
         /// <summary>
         /// Captures a frame from the camera preview and saves the photo
         /// </summary>
@@ -230,25 +266,7 @@ namespace ReceptionKiosk.Controls
                     return null;
                 }
 
-                // Capture a frame from the preview stream
-                //var videoFrame = new VideoFrame(BitmapPixelFormat.Bgra8, CameraResolutionWidth, CameraResolutionHeight);
-                //using (var currentFrame = await _mediaCapture.GetPreviewFrameAsync(videoFrame))
-                //{
-                //    using (SoftwareBitmap previewFrame = currentFrame.SoftwareBitmap)
-                //    {
-
-                //    }
-                //}
-
-                // Prepare and capture photo
-                //var lowLagCapture = await _mediaCapture.PrepareLowLagPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Bgra8));
-
-                //var capturedPhoto = await lowLagCapture.CaptureAsync();
-                //var softwareBitmap = capturedPhoto.Frame.SoftwareBitmap;
-
-                //await lowLagCapture.FinishAsync();
-
-                var myPictures = await Windows.Storage.StorageLibrary.GetLibraryAsync(Windows.Storage.KnownLibraryId.Pictures);
+                var myPictures = await StorageLibrary.GetLibraryAsync(KnownLibraryId.Pictures);
                 StorageFile file = await myPictures.SaveFolder.CreateFileAsync($"photo-{DateTime.Now.ToString("yyyy-MM-dd-hh-m-s")}.jpg", CreationCollisionOption.GenerateUniqueName);
 
                 var lowLagCapture = await _mediaCapture.PrepareLowLagPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Bgra8));
@@ -309,6 +327,10 @@ namespace ReceptionKiosk.Controls
             return null;
         }
 
+        /// <summary>
+        /// Adds a reference to a picture collection
+        /// </summary>
+        /// <param name="pictures"></param>
         internal void SetPictureLib(ObservableCollection<BitmapWrapper> pictures)
         {
             Pictures = pictures;
