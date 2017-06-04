@@ -13,8 +13,8 @@ namespace ReceptionKiosk.Views
         {
             InitializeComponent();
 
-            //Fixed: Textbox can't focused
-            //Further Informations: https://stackoverflow.com/questions/39096758/cant-enter-enter-text-in-textbox-control-inside-flyout
+            //Fixed: Textbox can't focus
+            //Further Information: https://stackoverflow.com/questions/39096758/cant-enter-enter-text-in-textbox-control-inside-flyout
             if (Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.FrameworkElement", "AllowFocusOnInteraction"))
             {
                 openAddFlyoutButton.AllowFocusOnInteraction = true;

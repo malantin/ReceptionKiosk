@@ -10,6 +10,7 @@
     
     <Page.Resources>
         <ctl:SelectedItemConverter x:Key="selectedItemConverter" />
+        <ctl:BooleanToVisibilityConverter x:Key="booltovisiblity" />
     </Page.Resources>
 
     <Grid x:Name="ContentArea" Margin="12,0,12,0">
@@ -18,9 +19,15 @@
             <RowDefinition x:Name="TitleRow" Height="48"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        
+        <!-- LOADING INDICATOR-->
+        <Grid Grid.RowSpan="2" Width="auto" x:Name="loadingFrame" Background="DarkGray" Canvas.ZIndex="10" Opacity="0.5" Visibility="{x:Bind ViewModel.IsLoading, Converter={StaticResource booltovisiblity}, Mode=OneWay}">
+            <ProgressRing x:Name="progressRing" Height="50" Width="50" IsActive="{x:Bind ViewModel.IsLoading, Mode=TwoWay}"/>
+        </Grid>
 
         <!-- COMMANDBAR -->
         <CommandBar Grid.Row="0" x:Name="commandBar" VerticalAlignment="Top" HorizontalContentAlignment="Stretch">
+            <AppBarButton x:Name="trainButton" Icon="Play" Label="Train Model" Command="{x:Bind ViewModel.TrainCommand}" IsEnabled="True" />
             <AppBarButton x:Name="refreshUiButton" IsEnabled="False" Icon="Refresh" Label="Refresh" />
             <AppBarButton x:Name="openAddFlyoutButton" Icon="Add" Label="Add">
                 <AppBarButton.Flyout>
@@ -53,9 +60,7 @@
             x:Name="TitlePage"
             x:Uid="ManageFaces_Title"
             FontSize="28" FontWeight="SemiLight" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" VerticalAlignment="Center"
-            Margin="0,0,12,7"/>
-
-            <ProgressRing x:Name="progressRing" Height="50" Width="50" IsActive="{x:Bind ViewModel.IsLoading, Mode=TwoWay}"/>
+            Margin="5,0,12,7"/>
         </StackPanel>
 
         <!-- Content -->

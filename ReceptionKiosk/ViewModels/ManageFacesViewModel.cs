@@ -35,6 +35,11 @@ namespace ReceptionKiosk.ViewModels
         /// </summary>
         public RelayCommand DeleteCommand { get; private set; }
 
+        /// <summary>
+        /// Train Command
+        /// </summary>
+        public RelayCommand TrainCommand { get; private set; }
+
         #endregion //Commands
 
         #region Collections
@@ -69,7 +74,7 @@ namespace ReceptionKiosk.ViewModels
         public PersonGroup SelectedPersonGroup
         {
             get { return _selectedPersonGroup; }
-            set { Set(ref _selectedPersonGroup, value); DeleteCommand.OnCanExecuteChanged(); }
+            set { Set(ref _selectedPersonGroup, value); DeleteCommand.OnCanExecuteChanged(); TrainCommand.OnCanExecuteChanged(); }
         }
 
         private Person _selectedPerson;
@@ -124,7 +129,31 @@ namespace ReceptionKiosk.ViewModels
             AddPersonCommand = new RelayCommand(async () => await ExecuteAddPersonCommandAsync(), CanExecuteAddPersonCommandAsync);
 
             DeleteCommand = new RelayCommand(async () => await ExecuteDeleteCommandAsync(), CanExecuteDeleteCommandAsync);
+            TrainCommand = new RelayCommand(async () => await ExecuteTrainCommandAsync(), CanExecuteTrainCommandAsync);
+
         }
+
+        private async Task ExecuteTrainCommandAsync()
+        {
+            try
+            {
+                IsLoading = true;
+                await faceService.TrainPersonGroupAsync(SelectedPersonGroup.PersonGroupId);
+                IsLoading = false;
+                await MessageDialogHelper.MessageDialogAsync($"Group {SelectedPersonGroup.Name} has successfully been trained.");
+            }
+            catch(Exception e)
+            {
+                await MessageDialogHelper.MessageDialogAsync("Group could not be trained", e.Message);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        public bool CanExecuteTrainCommandAsync()
+        { return SelectedPersonGroup != null; }
 
         #region AddGroupCommand
         private async Task ExecuteAddGroupCommandAsync()
@@ -140,10 +169,11 @@ namespace ReceptionKiosk.ViewModels
                 //Cleanup UI
                 GroupToAdd = string.Empty;
                 await LoadGroupsAsync();
+                
             }
             catch (Exception ex)
             {
-                var dialog = new MessageDialog(ex.Message, "Fehler");
+                var dialog = new MessageDialog(ex.Message, "Group could not be added.");
                 await dialog.ShowAsync();
             }
         }
@@ -240,9 +270,14 @@ namespace ReceptionKiosk.ViewModels
             try
             {
                 if (SelectedPersonGroup != null)
+                { 
                     await LoadPersonsOfGroupAsync(SelectedPersonGroup.PersonGroupId);
+                }
                 else
-                    await MessageDialogHelper.MessageDialogAsync("Didn't select a group, please try again later.");
+                {
+                    //DOTO Handle this case
+                    //await MessageDialogHelper.MessageDialogAsync("Didn't select a group, please try again later.");
+                }
             }
             catch (Exception ex)
             {
