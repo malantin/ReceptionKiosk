@@ -45,17 +45,17 @@ namespace ReceptionKiosk.ViewModels
         #region Collections
 
         /// <summary>
-        /// Liste aller verfügbaren Gruppen
+        /// List of all available groups
         /// </summary>
         public ObservableCollection<PersonGroup> PersonGroups { get; private set; }
 
         /// <summary>
-        /// Alle Personen einer Gruppe
+        /// All persons of a group
         /// </summary>
         public ObservableCollection<Person> Persons { get; set; }
 
         /// <summary>
-        /// Alle Bilder zu einer Person
+        /// All picture for a face
         /// </summary>
         public ObservableCollection<PersonFace> PersonFaces { get; set; }
 
@@ -163,13 +163,26 @@ namespace ReceptionKiosk.ViewModels
                 if (string.IsNullOrEmpty(GroupToAdd))
                     throw new ArgumentNullException(nameof(GroupToAdd), "Please enter a group name.");
 
+                //Remember which group was selected by its unique ID
+                var tempSelectedGroupId = SelectedPersonGroup.PersonGroupId;
+
                 await faceService.CreatePersonGroupAsync(Guid.NewGuid().ToString(), GroupToAdd);
                 await (new MessageDialog($"'{GroupToAdd}' successfully added.")).ShowAsync();
 
                 //Cleanup UI
                 GroupToAdd = string.Empty;
                 await LoadGroupsAsync();
-                
+
+                //Set the selected group back to the group we had selected before
+                foreach (var group in PersonGroups)
+                {
+                    if (group.PersonGroupId.Equals(tempSelectedGroupId))
+                    {
+                        SelectedPersonGroup = group;
+                        break;
+                    }
+                }
+
             }
             catch (Exception ex)
             {
@@ -321,7 +334,6 @@ namespace ReceptionKiosk.ViewModels
         private async Task LoadGroupsAsync()
         {
             PersonGroups.Clear();
-
             var fscPersonGroups = await faceService.ListPersonGroupsAsync();
             fscPersonGroups.OrderBy(pg => pg.Name).ForEach(pg => PersonGroups.Add(pg));
         }
