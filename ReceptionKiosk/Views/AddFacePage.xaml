@@ -45,9 +45,11 @@
                             <DataTemplate>
                                 <StackPanel>
                                     <Image Height="100" Width="100" Source="{Binding Path=BitmapSource}"/>
+                                    <!--
                                     <AppBarButton Content="Delete" Icon="Delete" Label="Delete" Command="{Binding Path=ViewModel.RemoveImageCommand}" />
+                                -->
                                 </StackPanel>
-                                
+
                             </DataTemplate>
                         </GridView.ItemTemplate>
 
@@ -56,7 +58,7 @@
                                 <ItemsWrapGrid MaximumRowsOrColumns="3" />
                             </ItemsPanelTemplate>
                         </GridView.ItemsPanel>-->
-                        
+
                     </GridView>
                     <StackPanel Orientation="Horizontal">
                         <AppBarButton x:Name="browsePicturesButton"  Content="Browse Folder" Label="Browse Folder" Icon="BrowsePhotos" Command="{x:Bind ViewModel.BrowsePictureCommand}" />
