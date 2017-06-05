@@ -12,19 +12,19 @@ namespace ReceptionKiosk.Helpers
         private static APISettingsService apiSettingsService { get; set; } = new APISettingsService();
 
         /// <summary>
-        /// FaceServiceClient URL
+        /// FaceServiceClient base URL
         /// </summary>
-        private static string faceServiceUrl { get; set; } = "https://westeurope.api.cognitive.microsoft.com/face/v1.0";
-
+        private static string faceServiceBaseUrl { get; set; } = "https://{0}.api.cognitive.microsoft.com/face/v1.0";//"https://westeurope.api.cognitive.microsoft.com/face/v1.0";
+        
         /// <summary>
-        /// Erstellt eine FaceServiceClient Instanz
+        /// Create a FaceServiceClient Instance with initialized API-Keys
         /// </summary>
         /// <returns></returns>
         public static async Task<FaceServiceClient> CreateNewFaceServiceAsync()
         {
             await apiSettingsService.LoadAPIKeysFromSettingsAsync();
 
-            return new FaceServiceClient(apiSettingsService.FaceApiKey, faceServiceUrl);
+            return new FaceServiceClient(apiSettingsService.FaceApiKey, string.Format(faceServiceBaseUrl, apiSettingsService.FaceApiRegion));
         }
     }
 }

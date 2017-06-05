@@ -1,5 +1,4 @@
 using ReceptionKiosk.ViewModels;
-
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
@@ -24,7 +23,7 @@ namespace ReceptionKiosk.Views
 
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
-            await ViewModel.InitializeAsync();
+            await ViewModel.InitializeAsync();            
         }
     }
 }

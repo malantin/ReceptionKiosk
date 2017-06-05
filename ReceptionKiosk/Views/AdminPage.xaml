@@ -31,8 +31,15 @@
                     <TextBlock Text="API Keys" Style="{StaticResource SubheaderTextBlockStyle}"/>
                     
                     <!--<TextBox Header="Face API Key" Text="{x:Bind ViewModel.ApiSettingService.FaceApiKey, Mode=TwoWay}" VerticalAlignment="Top" />-->
-                    
-                    <PasswordBox Header="Face API Key" Password="{x:Bind ViewModel.ApiSettingService.FaceApiKey, Mode=TwoWay}" VerticalAlignment="Top" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <PasswordBox Grid.Column="0" Header="Face API Key" Password="{x:Bind ViewModel.ApiSettingService.FaceApiKey, Mode=TwoWay}"/>
+                        <ComboBox Grid.Column="1" MinWidth="200" Header="Region" Margin="5,0,0,0" ItemsSource="{x:Bind ViewModel.ApiSettingService.AvailableRegions}" SelectedItem="{x:Bind ViewModel.ApiSettingService.FaceApiRegion, Mode=TwoWay}"/>
+                    </Grid>                    
 
                     <PasswordBox Header="Bing Search API Key" Margin="0,10,0,0" Password="{x:Bind ViewModel.ApiSettingService.BingSearchApiKey, Mode=TwoWay}" />
 

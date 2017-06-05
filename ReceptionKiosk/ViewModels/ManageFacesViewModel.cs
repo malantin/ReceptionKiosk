@@ -16,7 +16,7 @@ namespace ReceptionKiosk.ViewModels
         /// <summary>
         /// FaceServiceClient Instance
         /// </summary>
-        private FaceServiceClient faceService { get; set; }
+        private FaceServiceClient FaceService { get; set; }
 
         #region Commands
 
@@ -138,11 +138,11 @@ namespace ReceptionKiosk.ViewModels
             try
             {
                 IsLoading = true;
-                await faceService.TrainPersonGroupAsync(SelectedPersonGroup.PersonGroupId);
+                await FaceService.TrainPersonGroupAsync(SelectedPersonGroup.PersonGroupId);
                 IsLoading = false;
                 await MessageDialogHelper.MessageDialogAsync($"Group {SelectedPersonGroup.Name} has successfully been trained.");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 await MessageDialogHelper.MessageDialogAsync("Group could not be trained", e.Message);
             }
@@ -166,7 +166,7 @@ namespace ReceptionKiosk.ViewModels
                 //Remember which group was selected by its unique ID
                 var tempSelectedGroupId = SelectedPersonGroup.PersonGroupId;
 
-                await faceService.CreatePersonGroupAsync(Guid.NewGuid().ToString(), GroupToAdd);
+                await FaceService.CreatePersonGroupAsync(Guid.NewGuid().ToString(), GroupToAdd);
                 await (new MessageDialog($"'{GroupToAdd}' successfully added.")).ShowAsync();
 
                 //Cleanup UI
@@ -210,7 +210,7 @@ namespace ReceptionKiosk.ViewModels
                 if (SelectedGroupToAddPerson == null)
                     throw new ArgumentNullException(nameof(SelectedGroupToAddPerson), "Please select a group.");
 
-                await faceService.CreatePersonAsync(SelectedGroupToAddPerson.PersonGroupId, PersonToAdd);
+                await FaceService.CreatePersonAsync(SelectedGroupToAddPerson.PersonGroupId, PersonToAdd);
                 await MessageDialogHelper.MessageDialogAsync($"'{PersonToAdd}' successfully added.");
 
                 //Cleanup UI
@@ -242,7 +242,7 @@ namespace ReceptionKiosk.ViewModels
                                                                 $"Are you sure you want to delete '{SelectedPerson.Name}'?",
                                                                 async () =>
                                                                 {
-                                                                    await faceService.DeletePersonAsync(SelectedPersonGroup.PersonGroupId, SelectedPerson.PersonId);
+                                                                    await FaceService.DeletePersonAsync(SelectedPersonGroup.PersonGroupId, SelectedPerson.PersonId);
                                                                     await MessageDialogHelper.MessageDialogAsync("Deleting Person", $"'{SelectedPerson.Name}' successfully deleted.");
                                                                 },
                                                                 async () => await MessageDialogHelper.MessageDialogAsync("Deleting Person", "Deleting was canceled by user."));
@@ -258,7 +258,7 @@ namespace ReceptionKiosk.ViewModels
                                                                 $"Are you sure you want to delete '{SelectedPersonGroup.Name}'?",
                                                                 async () =>
                                                                     {
-                                                                        await faceService.DeletePersonGroupAsync(SelectedPersonGroup.PersonGroupId);
+                                                                        await FaceService.DeletePersonGroupAsync(SelectedPersonGroup.PersonGroupId);
                                                                         await MessageDialogHelper.MessageDialogAsync("Deleting Group", $"'{SelectedPersonGroup.Name}' successfully deleted.");
                                                                     },
                                                                 async () => await MessageDialogHelper.MessageDialogAsync("Deleting Group", "Deleting was canceled by user."));
@@ -283,7 +283,7 @@ namespace ReceptionKiosk.ViewModels
             try
             {
                 if (SelectedPersonGroup != null)
-                { 
+                {
                     await LoadPersonsOfGroupAsync(SelectedPersonGroup.PersonGroupId);
                 }
                 else
@@ -317,14 +317,25 @@ namespace ReceptionKiosk.ViewModels
 
         public async Task InitializeAsync()
         {
-            IsLoading = true;
+            try
+            {
+                IsLoading = true;
 
-            if (faceService == null)
-                faceService = await FaceServiceHelper.CreateNewFaceServiceAsync();
+                if (FaceService == null)
+                    FaceService = await FaceServiceHelper.CreateNewFaceServiceAsync();
 
-            await LoadGroupsAsync();
+                await LoadGroupsAsync();
 
-            IsLoading = false;
+                IsLoading = false;
+            }
+            catch (FaceAPIException ex)//Handle API-Exception
+            {
+                await MessageDialogHelper.MessageDialogAsync(ex.ErrorMessage);
+            }
+            catch (Exception ex)
+            {
+                await MessageDialogHelper.MessageDialogAsync(ex.Message);
+            }
         }
 
         /// <summary>
@@ -334,7 +345,7 @@ namespace ReceptionKiosk.ViewModels
         private async Task LoadGroupsAsync()
         {
             PersonGroups.Clear();
-            var fscPersonGroups = await faceService.ListPersonGroupsAsync();
+            var fscPersonGroups = await FaceService.ListPersonGroupsAsync();
             fscPersonGroups.OrderBy(pg => pg.Name).ForEach(pg => PersonGroups.Add(pg));
         }
 
@@ -346,7 +357,7 @@ namespace ReceptionKiosk.ViewModels
         {
             Persons.Clear();
 
-            var persons = await faceService.ListPersonsAsync(groupID);
+            var persons = await FaceService.ListPersonsAsync(groupID);
             persons.OrderBy(p => p.Name).ForEach(p => Persons.Add(p));
         }
     }

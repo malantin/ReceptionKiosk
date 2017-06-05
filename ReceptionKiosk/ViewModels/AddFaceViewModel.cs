@@ -1,6 +1,7 @@
 using Microsoft.ProjectOxford.Face;
 using Microsoft.ProjectOxford.Face.Contract;
 using ReceptionKiosk.Helpers;
+using ReceptionKiosk.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -172,6 +173,7 @@ namespace ReceptionKiosk.ViewModels
         }
 
         #endregion
+
         private async Task ExecuteAddPersonCommand()
         {
             if (NewFaceName != string.Empty && Pictures.Count > 0 && SelectedPersonGroup != null)
@@ -224,16 +226,27 @@ namespace ReceptionKiosk.ViewModels
 
         public async Task InitializeAsync()
         {
-            IsLoading = true;
+            try
+            {
+                IsLoading = true;
 
-            if (FaceService == null)
-                FaceService = await FaceServiceHelper.CreateNewFaceServiceAsync();
+                if (FaceService == null)
+                    FaceService = await FaceServiceHelper.CreateNewFaceServiceAsync();
 
-            var personGroupResult = await FaceService.ListPersonGroupsAsync();
-            personGroupResult.OrderBy(pg => pg.Name);
-            personGroupResult.ForEach(pg => PersonGroups.Add(pg));
+                var personGroupResult = await FaceService.ListPersonGroupsAsync();
+                personGroupResult.OrderBy(pg => pg.Name);
+                personGroupResult.ForEach(pg => PersonGroups.Add(pg));
 
-            IsLoading = false;
+                IsLoading = false;
+            }
+            catch (FaceAPIException ex)//Handle API-Exception
+            {
+                await MessageDialogHelper.MessageDialogAsync(ex.ErrorMessage);
+            }
+            catch (Exception ex)
+            {
+                await MessageDialogHelper.MessageDialogAsync(ex.Message);
+            }
         }
     }
 }

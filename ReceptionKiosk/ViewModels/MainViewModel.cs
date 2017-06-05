@@ -1,5 +1,7 @@
 using Microsoft.ProjectOxford.Face;
 using ReceptionKiosk.Helpers;
+using ReceptionKiosk.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace ReceptionKiosk.ViewModels
@@ -28,8 +30,19 @@ namespace ReceptionKiosk.ViewModels
 
         public async Task InitializeAsync()
         {
-            if (FaceService == null)
-                FaceService = await FaceServiceHelper.CreateNewFaceServiceAsync();
+            try
+            {
+                if (FaceService == null)
+                    FaceService = await FaceServiceHelper.CreateNewFaceServiceAsync();
+            }
+            catch (FaceAPIException ex)//Handle API-Exception
+            {
+                await MessageDialogHelper.MessageDialogAsync(ex.ErrorMessage);
+            }
+            catch (Exception ex)
+            {
+                await MessageDialogHelper.MessageDialogAsync(ex.Message);
+            }
         }
     }
 }
