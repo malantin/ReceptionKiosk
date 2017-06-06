@@ -1,0 +1,110 @@
+<Page
+    x:Class="ReceptionKiosk.Views.ManageFacesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ctl="using:ReceptionKiosk.Controls"    
+    mc:Ignorable="d">
+
+    
+    <Page.Resources>
+        <ctl:SelectedItemConverter x:Key="selectedItemConverter" />
+        <ctl:BooleanToVisibilityConverter x:Key="booltovisiblity" />
+    </Page.Resources>
+
+    <Grid x:Name="ContentArea" Margin="12,0,12,0">
+
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="TitleRow" Height="48"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- LOADING INDICATOR-->
+        <Grid Grid.RowSpan="2" Width="auto" x:Name="loadingFrame" Background="DarkGray" Canvas.ZIndex="10" Opacity="0.5" Visibility="{x:Bind ViewModel.IsLoading, Converter={StaticResource booltovisiblity}, Mode=OneWay}">
+            <ProgressRing x:Name="progressRing" Height="50" Width="50" IsActive="{x:Bind ViewModel.IsLoading, Mode=TwoWay}"/>
+        </Grid>
+
+        <!-- COMMANDBAR -->
+        <CommandBar Grid.Row="0" x:Name="commandBar" VerticalAlignment="Top" HorizontalContentAlignment="Stretch">
+            <AppBarButton x:Name="trainButton" Icon="Play" Label="Train Model" Command="{x:Bind ViewModel.TrainCommand}" IsEnabled="True" />
+            <AppBarButton x:Name="refreshUiButton" IsEnabled="False" Icon="Refresh" Label="Refresh" />
+            <AppBarButton x:Name="openAddFlyoutButton" Icon="Add" Label="Add">
+                <AppBarButton.Flyout>
+                    <Flyout x:Name="addFlyout">
+                        <StackPanel Orientation="Vertical">
+                            <!-- ADD PERSON GROUP -->
+                            <TextBox x:Name="personGroupNameTextBox" Header="Group" TextWrapping="Wrap" Width="262" PlaceholderText="Enter group name (e.g. Visitors)" Text="{x:Bind ViewModel.GroupToAdd, Mode=TwoWay}"/>
+                            <Button x:Name="addPersonGroupButton" Margin="0,5,0,0" Content="Add" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.AddGroupCommand}" />
+
+                            <!-- OR -->
+                            <TextBlock Text="- OR -" Margin="0,10,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" />
+
+                            <!-- ADD PERSON -->
+                            <ComboBox x:Name="groupsComboBox" Header="Choose Group" ItemsSource="{x:Bind ViewModel.PersonGroups}" DisplayMemberPath="Name" SelectedItem="{x:Bind ViewModel.SelectedGroupToAddPerson, Mode=TwoWay, Converter={StaticResource selectedItemConverter}}" />
+                            <TextBox x:Name="personNameTextBox" Header="Person" TextWrapping="Wrap" Width="262" PlaceholderText="Enter person name (e.g. Bill Gates)" Text="{x:Bind ViewModel.PersonToAdd, Mode=TwoWay}"/>
+                            <Button x:Name="addPersonButton" Margin="0,5,0,0" Content="Add" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.AddPersonCommand}" />
+                        </StackPanel>
+                    </Flyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+            
+            <AppBarSeparator />
+
+            <AppBarButton x:Name="openDeleteFlyoutButton" Icon="Delete" Label="Delete" Command="{x:Bind ViewModel.DeleteCommand}" />
+        </CommandBar>
+
+        <!-- Heading -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <TextBlock
+            x:Name="TitlePage"
+            x:Uid="ManageFaces_Title"
+            FontSize="28" FontWeight="SemiLight" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" VerticalAlignment="Center"
+            Margin="5,0,12,7"/>
+        </StackPanel>
+
+        <!-- Content -->
+        <Grid Grid.Row="1" Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="PersonGroups" Width="*" />
+                <ColumnDefinition x:Name="Persons" Width="*" />
+                <ColumnDefinition x:Name="Faces" Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="Header" Height="40" />
+                <RowDefinition x:Name="Content" Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- CONTENT HEADER -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Groups" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="Persons" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="Faces" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+            <!-- SUBCONTENT -->
+            <ListBox Grid.Row="1" Grid.Column="0" x:Name="listBoxPersonGroups" ItemsSource="{x:Bind ViewModel.PersonGroups, Mode=OneWay}" DisplayMemberPath="Name" SelectionMode="Single" SelectedItem="{x:Bind ViewModel.SelectedPersonGroup, Mode=TwoWay, Converter={StaticResource selectedItemConverter}}" SelectionChanged="{x:Bind ViewModel.OnPersonGroupChanged}" />
+            <ListBox Grid.Row="1" Grid.Column="1" x:Name="listBoxPersons" ItemsSource="{x:Bind ViewModel.Persons}" DisplayMemberPath="Name" SelectionMode="Single" SelectedItem="{x:Bind ViewModel.SelectedPerson, Mode=TwoWay, Converter={StaticResource selectedItemConverter}}" SelectionChanged="{x:Bind ViewModel.OnPersonChanged}"/>
+            <TextBlock Grid.Row="1" Grid.Column="2" x:Name="countOfFaces" Text="{x:Bind ViewModel.CountOfFaces, Mode=TwoWay}" Margin="10,10,0,0" />
+        </Grid>
+
+        <!--  Adaptive triggers  -->
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="WindowStates">
+                <VisualState x:Name="WideState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="640"/>
+                    </VisualState.StateTriggers>
+                </VisualState>
+                <VisualState x:Name="NarrowState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="TitlePage.Margin" Value="48,0,12,7"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+    </Grid>
+</Page>

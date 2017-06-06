@@ -1,2 +1,3 @@
-# Intelligent Kiosk Sample
-This project is based on the [Cognitive Samples Itelligent Kiosk](https://github.com/Microsoft/Cognitive-Samples-IntelligentKiosk) is focused on identifying and greeting people.
+# Reception Kiosk
+
+Based on some ideas from the [Cognitive Samples Intelligent Kiosk](https://github.com/Microsoft/Cognitive-Samples-IntelligentKiosk) this reception kiosk app is focused on identifying and greeting people using the Microsoft [Cognitive Services Face API](https://azure.microsoft.com/en-us/services/cognitive-services/face/). Currently the app implements adding groups of people to the database, adding faces to those people for training and training the recognition algorithm. Feel free to use this project as a management interface for working with the Microsoft Cognitive Services Face API.
