@@ -148,10 +148,10 @@
     <value>Admin</value>
   </data>
   <data name="AddFace_Title.Text" xml:space="preserve">
-    <value>AddFace</value>
+    <value>Add Faces</value>
   </data>
   <data name="ManageFaces_Title.Text" xml:space="preserve">
-    <value>ManageFaces</value>
+    <value>Manage Faces</value>
   </data>
   <data name="Shell_Main" xml:space="preserve">
     <value>Main</value>
@@ -163,10 +163,10 @@
     <value>Admin</value>
   </data>
   <data name="Shell_AddFace" xml:space="preserve">
-    <value>AddFace</value>
+    <value>Add Faces</value>
   </data>
   <data name="Shell_ManageFaces" xml:space="preserve">
-    <value>ManageFaces</value>
+    <value>Manage Faces</value>
   </data>
   <data name="AddFace_CompleteInformation" xml:space="preserve">
     <value>Please make sure you have set a name, selected a group and added at least one photo.</value>

@@ -119,21 +119,6 @@ namespace ReceptionKiosk.ViewModels
 
                         using (IRandomAccessStream stream = await item.OpenAsync(FileAccessMode.Read))
                         {
-                            //// Create the decoder from the stream
-                            //BitmapDecoder decoder2 = await BitmapDecoder.CreateAsync(stream);
-                            //// Get the SoftwareBitmap representation of the file
-                            //softwareBitmap = await decoder2.GetSoftwareBitmapAsync();
-                            //// Create an encoder with the desired format
-                            //BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
-                            //encoder.SetSoftwareBitmap(softwareBitmap);
-
-                            //await encoder.FlushAsync();
-
-                            //var iostream = stream.AsStreamForRead();
-
-                            //var result = await FaceService.AddPersonFaceAsync(SelectedPersonGroup.PersonGroupId, new Guid("6aa5f65d-1cb6-497d-b692-9da56b33658d"), iostream);
-
-
                             // Create the decoder from the stream
                             BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream);
 
@@ -146,13 +131,6 @@ namespace ReceptionKiosk.ViewModels
 
                             Pictures.Add(new BitmapWrapper(softwareBitmap, softwareBitmapSource));
                         }
-
-                        //var bitmap = new SoftwareBitmap()
-                        //using (var stream = await item.OpenReadAsync())
-                        //{
-                        //    await bitmap.SetSourceAsync(stream);
-                        //    Pictures.Add(bitmap);
-                        //}
                     }
                 }
             }
