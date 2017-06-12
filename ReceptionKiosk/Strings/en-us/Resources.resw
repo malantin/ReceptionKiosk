@@ -136,7 +136,7 @@
     <value>About this application</value>
   </data>
   <data name="Settings_AboutDescription.Text" xml:space="preserve">
-    <value>Settings page placeholder text.  Your app description goes here.</value>
+    <value>This app will help you to welcome returning visitors after adding them to the database.</value>
   </data>
   <data name="Settings_PrivacyTermsLink.Content" xml:space="preserve">
     <value>Privacy Terms</value>
@@ -176,5 +176,11 @@
   </data>
   <data name="CameraControl_NoAccessToCameraTitle" xml:space="preserve">
     <value>No access to camera</value>
+  </data>
+  <data name="Main_Message_Back" xml:space="preserve">
+    <value>Welcome back {0}!</value>
+  </data>
+  <data name="Main_Message_Init" xml:space="preserve">
+    <value>Please start the camera by tapping the button.</value>
   </data>
 </root>

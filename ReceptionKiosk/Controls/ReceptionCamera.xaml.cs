@@ -10,6 +10,7 @@ using Windows.Graphics.Display;
 using Windows.Graphics.Imaging;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
+using Windows.Media.Core;
 using Windows.Storage;
 using Windows.System.Display;
 using Windows.UI.Core;
@@ -17,6 +18,11 @@ using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
+using Microsoft.ProjectOxford.Face;
+using Windows.Storage.Streams;
+using System.IO;
+using Microsoft.ProjectOxford.Face.Contract;
+using System.Collections.Generic;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -31,15 +37,59 @@ namespace ReceptionKiosk.Controls
 
         public MediaCapture _mediaCapture;
 
+        /// <summary>
+        /// FaceServiceClient instance
+        /// </summary>
+        private FaceServiceClient FaceService { get; set; }
+
         ObservableCollection<BitmapWrapper> _pictures;
+
+        FaceDetectionEffect _faceDetectionEffect;
+
+        public Guid[] LastFaces { get; set; }
 
         public ObservableCollection<BitmapWrapper> Pictures { get { return _pictures; } set { _pictures = value; } }
 
         //Is the camera preview active?
-        private bool _isPreviewing;
+        private bool _isPreviewing = false;
+
+        //Is face detection active?
+        private bool _isDetecting = false;
+
+        //Is there in identification call in progress?
+        private bool _isIdentifying = false;
 
         private DisplayRequest _displayRequest = new DisplayRequest();
         private SemaphoreSlim frameProcessingSemaphore = new SemaphoreSlim(1);
+
+        public static readonly DependencyProperty PhotoButtonVisibleProperty = 
+            DependencyProperty.Register(
+                "PhotoButtonVisible",
+                typeof(bool),
+                typeof(ReceptionCamera),
+                new PropertyMetadata(true, OnValueChanged));
+
+        public bool PhotoButtonVisible
+        {
+            get { return (bool)GetValue(PhotoButtonVisibleProperty); }
+            set { SetValue(PhotoButtonVisibleProperty, value);
+                if (value == true)
+                {
+                    photoButton.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    photoButton.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+        private static void OnValueChanged(DependencyObject d,
+        DependencyPropertyChangedEventArgs e)
+        {
+            // Redraw trail, rotate needle, and update value text.
+            // ...
+        }
 
         /// <summary>
         /// Is the camera preview active?
@@ -60,6 +110,7 @@ namespace ReceptionKiosk.Controls
         {
             this.InitializeComponent();
             IsPreviewing = false;
+            LastFaces = null;
         }
 
         /// <summary>
@@ -78,6 +129,64 @@ namespace ReceptionKiosk.Controls
         }
 
         void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        /// <summary>
+        /// Handle a face detected event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private async void FaceDetectionEffect_FaceDetected(FaceDetectionEffect sender, FaceDetectedEventArgs args)
+        {
+            if (!_isIdentifying)
+            {
+                //If we need the box for the detected face we can get them here
+                //foreach (Windows.Media.FaceAnalysis.DetectedFace face in args.ResultFrame.DetectedFaces)
+                //{
+                //    BitmapBounds faceRect = face.FaceBox;
+
+                _isIdentifying = true;
+
+                var lowLagCapture = await _mediaCapture.PrepareLowLagPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Bgra8));
+
+                var capturedPhoto = await lowLagCapture.CaptureAsync();
+                var softwareBitmap = capturedPhoto.Frame.SoftwareBitmap;
+
+                await lowLagCapture.FinishAsync();
+
+                using (IRandomAccessStream randomAccessStream = new InMemoryRandomAccessStream())
+                {
+
+                    BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, randomAccessStream);
+
+                    encoder.SetSoftwareBitmap(softwareBitmap);
+
+                    await encoder.FlushAsync();
+
+                    var stream = randomAccessStream.AsStreamForRead();
+
+                    try
+                    { 
+                        var faces = await FaceService.DetectAsync(stream, true, false);
+
+                        List<Guid> faceList = new List<Guid>();
+
+                        foreach (var face in faces)
+                        {
+                            faceList.Add(face.FaceId);
+                        }
+
+                        LastFaces = faceList.ToArray();
+                    }
+                    catch
+                    {
+                        //We could not detect faces using Cognitive Services
+                    }
+                }
+
+                _isIdentifying = false;
+                //}
+            }
+        }
 
         /// <summary>
         /// Hides the grid that contains the preview and photo button
@@ -120,6 +229,45 @@ namespace ReceptionKiosk.Controls
                 //TODO Handle the exception
             }
 
+            // Always use face detection for debugging, use a switch later to enable or disable
+            await InitializeFaceDetection();
+        }
+
+        /// <summary>
+        /// Initializes face detection on the preview stream, from https://docs.microsoft.com/en-us/windows/uwp/audio-video-camera/scene-analysis-for-media-capture
+        /// </summary>
+        /// <returns></returns>
+        public async Task InitializeFaceDetection()
+        {
+            // Load the face service client to to face recognition with Cognitive Services
+            if (FaceService == null)
+                FaceService = await FaceServiceHelper.CreateNewFaceServiceAsync();
+
+            // Create the definition, which will contain some initialization settings
+            var definition = new FaceDetectionEffectDefinition();
+
+            // To ensure preview smoothness, do not delay incoming samples
+            definition.SynchronousDetectionEnabled = false;
+
+            // In this scenario, choose detection speed over accuracy
+            definition.DetectionMode = FaceDetectionMode.HighPerformance;
+
+            // Add the effect to the preview stream
+            _faceDetectionEffect = (FaceDetectionEffect)await _mediaCapture.AddVideoEffectAsync(definition, MediaStreamType.VideoPreview);
+
+            // TODO: Chance to a good frequency to save Cognitive Services API calls
+            // Choose the shortest interval between detection events
+            //_faceDetectionEffect.DesiredDetectionInterval = TimeSpan.FromMilliseconds(33);
+            // Currently we offline detect faces every 3 seconds
+            _faceDetectionEffect.DesiredDetectionInterval = TimeSpan.FromMilliseconds(3000);
+
+            // Start detecting faces
+            _faceDetectionEffect.Enabled = true;
+
+            // Register for face detection events
+            _faceDetectionEffect.FaceDetected += FaceDetectionEffect_FaceDetected;
+
+            _isDetecting = true;
         }
 
         /// <summary>
@@ -130,6 +278,23 @@ namespace ReceptionKiosk.Controls
         {
             if (_mediaCapture != null)
             {
+                if (_isDetecting)
+                {
+                    // Disable detection
+                    _faceDetectionEffect.Enabled = false;
+
+                    // Unregister the event handler
+                    _faceDetectionEffect.FaceDetected -= FaceDetectionEffect_FaceDetected;
+
+                    // Remove the effect from the preview stream
+                    await _mediaCapture.ClearEffectsAsync(MediaStreamType.VideoPreview);
+
+                    // Clear the member variable that held the effect instance
+                    _faceDetectionEffect = null;
+
+                    _isDetecting = false;
+                }
+
                 if (IsPreviewing)
                 {
                     await _mediaCapture.StopPreviewAsync();
@@ -280,25 +445,6 @@ namespace ReceptionKiosk.Controls
                         Pictures.Add(new BitmapWrapper(softwareBitmap, softwareBitmapSource));
                     }                    
                 }
-
-                //using (var captureStream = new InMemoryRandomAccessStream())
-                //{
-                //    await _mediaCapture.CapturePhotoToStreamAsync(ImageEncodingProperties.CreateJpeg(), captureStream);
-
-                //    using (var fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
-                //    {
-                //        var decoder = await BitmapDecoder.CreateAsync(captureStream);
-                //        var encoder = await BitmapEncoder.CreateForTranscodingAsync(fileStream, decoder);
-
-                //        var properties = new BitmapPropertySet
-                //        {
-                //            { "System.Photo.Orientation", new BitmapTypedValue(PhotoOrientation.Normal, PropertyType.UInt16) }
-                //         };
-                //        await encoder.BitmapProperties.SetPropertiesAsync(properties);
-
-                //        await encoder.FlushAsync();
-                //    }
-                //}
 
                 return softwareBitmap;
             }
