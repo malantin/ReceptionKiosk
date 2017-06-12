@@ -4,7 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    xmlns:ctl="using:ReceptionKiosk.Controls">
     <Grid x:Name="ContentArea" Margin="12,0,12,0">
 
         <Grid.RowDefinitions>
@@ -18,15 +19,30 @@
             FontSize="28" FontWeight="SemiLight" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" VerticalAlignment="Center"
             Margin="0,0,12,7"/>
 
+        <TextBlock
+            x:Name="APICounter"
+            FontSize="10" FontWeight="SemiLight" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" VerticalAlignment="Center"
+            HorizontalAlignment="Right" Text="{x:Bind ViewModel.APICalls, Mode=OneWay}"/>
+
         <Grid Grid.Row="1" Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" Text="" />
-            <!--<CaptureElement Grid.Column="1" Name="CameraPreview" Stretch="None" Height="auto" />-->
-        </Grid>
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.8" Grid.Row="0" >
+                <Viewbox Width="100" Height="100" HorizontalAlignment="Center">
+                    <SymbolIcon Symbol="Contact" x:Name="greetingSymbol" />
+                </Viewbox>
+                <TextBlock x:Name="greetingTextBlock" HorizontalAlignment="Center" Margin="0,24,0,0" Text="{x:Bind ViewModel.Message, Mode=OneWay, FallbackValue='Nice to meet you!'}"  Style="{StaticResource HeaderTextBlockStyle}" FontFamily="Segoe UI Light" FontStyle="Normal"  />
+            </StackPanel>
+
+        <ctl:ReceptionCamera Grid.Row="1" Height="300" Width="400" x:Name="cameraControl" Grid.Column="0" Margin="10" PhotoButtonVisible="False"></ctl:ReceptionCamera>
+
+    </Grid>
     
         <!--  Adaptive triggers  -->
         <VisualStateManager.VisualStateGroups>
