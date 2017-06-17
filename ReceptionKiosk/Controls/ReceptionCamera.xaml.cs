@@ -57,7 +57,7 @@ namespace ReceptionKiosk.Controls
         private bool _isDetecting = false;
 
         //Is there in identification call in progress?
-        private bool _isIdentifying = false;
+        private bool _isRecognizing = false;
 
         private DisplayRequest _displayRequest = new DisplayRequest();
         private SemaphoreSlim frameProcessingSemaphore = new SemaphoreSlim(1);
@@ -84,11 +84,26 @@ namespace ReceptionKiosk.Controls
             }
         }
 
+        public static readonly DependencyProperty FaceRecognitionActiveProperty =
+            DependencyProperty.Register(
+                "FaceRecognitionActive",
+                typeof(bool),
+                typeof(ReceptionCamera),
+                new PropertyMetadata(false, OnValueChanged));
+
+        public bool FaceRecognitionActive
+        {
+            get { return (bool)GetValue(FaceRecognitionActiveProperty); }
+            set
+            {
+                SetValue(FaceRecognitionActiveProperty, value);
+            }
+        }
+
         private static void OnValueChanged(DependencyObject d,
         DependencyPropertyChangedEventArgs e)
         {
-            // Redraw trail, rotate needle, and update value text.
-            // ...
+
         }
 
         /// <summary>
@@ -137,14 +152,16 @@ namespace ReceptionKiosk.Controls
         /// <param name="args"></param>
         private async void FaceDetectionEffect_FaceDetected(FaceDetectionEffect sender, FaceDetectedEventArgs args)
         {
-            if (!_isIdentifying)
+            // Only run one face detection call to Cognitive Services at a time
+            if (!_isRecognizing)
             {
                 //If we need the box for the detected face we can get them here
                 //foreach (Windows.Media.FaceAnalysis.DetectedFace face in args.ResultFrame.DetectedFaces)
                 //{
                 //    BitmapBounds faceRect = face.FaceBox;
+                //}
 
-                _isIdentifying = true;
+                _isRecognizing = true;
 
                 var lowLagCapture = await _mediaCapture.PrepareLowLagPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Bgra8));
 
@@ -166,6 +183,7 @@ namespace ReceptionKiosk.Controls
 
                     try
                     { 
+                        //This call the Cognitive Services face API to detect the faces
                         var faces = await FaceService.DetectAsync(stream, true, false);
 
                         List<Guid> faceList = new List<Guid>();
@@ -183,8 +201,7 @@ namespace ReceptionKiosk.Controls
                     }
                 }
 
-                _isIdentifying = false;
-                //}
+                _isRecognizing = false;
             }
         }
 
@@ -202,9 +219,9 @@ namespace ReceptionKiosk.Controls
         /// <returns></returns>
         public async Task StartPreviewAsync()
         {
-            IsPreviewing = true;
             try
             {
+                IsPreviewing = true;
                 _mediaCapture = new MediaCapture();
                 await _mediaCapture.InitializeAsync();
 
@@ -214,6 +231,7 @@ namespace ReceptionKiosk.Controls
             }
             catch (UnauthorizedAccessException)
             {
+                IsPreviewing = false;
                 // This will be thrown if the user denied access to the camera in privacy settings
                 await ShowNoCameraAccessDialogAsync();
                 return;
@@ -229,8 +247,10 @@ namespace ReceptionKiosk.Controls
                 //TODO Handle the exception
             }
 
-            // Always use face detection for debugging, use a switch later to enable or disable
-            await InitializeFaceDetection();
+            if (FaceRecognitionActive)
+            {
+                await InitializeFaceDetection();
+            }
         }
 
         /// <summary>
@@ -258,7 +278,7 @@ namespace ReceptionKiosk.Controls
             // TODO: Chance to a good frequency to save Cognitive Services API calls
             // Choose the shortest interval between detection events
             //_faceDetectionEffect.DesiredDetectionInterval = TimeSpan.FromMilliseconds(33);
-            // Currently we offline detect faces every 3 seconds
+            // Currently we offline detect faces every 3 seconds to save API calls
             _faceDetectionEffect.DesiredDetectionInterval = TimeSpan.FromMilliseconds(3000);
 
             // Start detecting faces
