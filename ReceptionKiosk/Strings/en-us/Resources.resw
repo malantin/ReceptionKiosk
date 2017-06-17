@@ -178,9 +178,12 @@
     <value>No access to camera</value>
   </data>
   <data name="Main_Message_Back" xml:space="preserve">
-    <value>Welcome back {0}!</value>
+    <value>Welcome back{0}!</value>
   </data>
   <data name="Main_Message_Init" xml:space="preserve">
     <value>Please start the camera by tapping the button.</value>
+  </data>
+  <data name="Main_Message_NA" xml:space="preserve">
+    <value>Sorry, we don't know you yet.</value>
   </data>
 </root>

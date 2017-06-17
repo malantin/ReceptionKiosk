@@ -4,6 +4,7 @@ using ReceptionKiosk.Controls;
 using ReceptionKiosk.Helpers;
 using ReceptionKiosk.Services;
 using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
 using Windows.UI.Core;
@@ -95,66 +96,94 @@ namespace ReceptionKiosk.ViewModels
 
         private async void loop()
         {
+            ConcurrentBag<String> people = new ConcurrentBag<string>();
+
             while (this._loopInProgress)
             {              
 
                 if (_lastFaces != _cameraControl.LastFaces && _cameraControl.LastFaces != null)
                 {
-                    
                     _lastFaces = _cameraControl.LastFaces;
 
-                    //await
                     await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
                     {
-                        bool _personFound = false;
                         if (_personGroups != null)
                         {
                             foreach (var group in _personGroups)
                             {
                                 foreach (var face in _cameraControl.LastFaces)
                                 {
-                                    var results = await FaceService.IdentifyAsync(group.PersonGroupId, _cameraControl.LastFaces);
-                                    APICalls++;
-                                    foreach (var result in results)
+                                    IdentifyResult[] results;
+                                    try
                                     {
-                                        if (result.Candidates.Length > 0)
+                                        results = await FaceService.IdentifyAsync(group.PersonGroupId, _cameraControl.LastFaces);
+
+                                        foreach (var result in results)
                                         {
-                                            var resultCandidate = result.Candidates[0];
-
-                                            //Let's start with 50% confidence for now
-                                            if (resultCandidate.Confidence > 0.5)
+                                            if (result.Candidates.Length > 0)
                                             {
-                                                var identifiedPerson = await FaceService.GetPersonAsync(group.PersonGroupId, resultCandidate.PersonId);
-                                                APICalls++;
-                                                Message = String.Format(loader.GetString("Main_Message_Back"), identifiedPerson.Name);
+                                                var resultCandidate = result.Candidates[0];
 
-                                                //Currently we take the first best person
-                                                _personFound = true;
-                                                break;
+                                                //Let's start with 50% confidence for now
+                                                if (resultCandidate.Confidence > 0.5)
+                                                {
+                                                    try
+                                                    {
+                                                        var identifiedPerson = await FaceService.GetPersonAsync(group.PersonGroupId, resultCandidate.PersonId);
+                                                        people.Add(identifiedPerson.Name);
+                                                    }
+                                                    catch
+                                                    {
+                                                        //return;
+                                                    }
+                                                    finally
+                                                    {
+                                                        APICalls++;
+                                                    }
+
+                                                    //Currently we take the first best person
+                                                    //Message = String.Format(loader.GetString("Main_Message_Back"), identifiedPerson.Name);
+                                                    //return;
+                                                }
                                             }
                                         }
                                     }
-
-                                    //Currently we take the first best person
-                                    if (_personFound)
+                                    finally
                                     {
-                                        break;
+                                        APICalls++;
                                     }
-                                }
 
-                                //Currently we take the first best person
-                                if (_personFound)
-                                {
-                                    break;
+                                    if (!people.IsEmpty)
+                                    {
+                                        string peopleNames = "";
+
+                                        foreach (var item in people)
+                                        {
+                                            peopleNames = peopleNames + ", " + item;
+                                        }
+                                        Message = String.Format(loader.GetString("Main_Message_Back"), peopleNames);
+                                    }
                                 }
                             }
                         }
                     });
-
                 }
 
-                //Wait 5 seconds to save API calls
-                await Task.Delay(5000);
+                if (people.IsEmpty)
+                {
+                    //Wait 1 seconds to save API calls
+                    await Task.Delay(1000);
+                }
+                else
+                {
+                    while (!people.IsEmpty)
+                    {
+                        string name;
+                        people.TryTake(out name);
+                    }
+                    //We found some people we know. Wait 5 seconds to save API calls
+                    await Task.Delay(5000);
+                }
             }
         }
     }
