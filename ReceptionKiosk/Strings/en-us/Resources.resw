@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Main_Title.Text" xml:space="preserve">
-    <value>Main</value>
+    <value>Welcome</value>
   </data>
   <data name="Settings_Title.Text" xml:space="preserve">
     <value>Settings</value>
@@ -142,13 +142,13 @@
     <value>Privacy Terms</value>
   </data>
   <data name="Settings_PrivacyTermsLink.NavigateUri" xml:space="preserve">
-    <value>https://YourPrivacyUrlGoesHere/</value>
+    <value />
   </data>
   <data name="Admin_Title.Text" xml:space="preserve">
     <value>Admin</value>
   </data>
   <data name="AddFace_Title.Text" xml:space="preserve">
-    <value>Add Faces</value>
+    <value>Add a new person</value>
   </data>
   <data name="ManageFaces_Title.Text" xml:space="preserve">
     <value>Manage Faces</value>
