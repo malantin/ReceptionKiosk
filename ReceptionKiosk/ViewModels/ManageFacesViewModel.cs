@@ -164,7 +164,11 @@ namespace ReceptionKiosk.ViewModels
                     throw new ArgumentNullException(nameof(GroupToAdd), "Please enter a group name.");
 
                 //Remember which group was selected by its unique ID
-                var tempSelectedGroupId = SelectedPersonGroup.PersonGroupId;
+                string tempSelectedGroupId = null;
+                if (SelectedPersonGroup != null)
+                {
+                    tempSelectedGroupId = SelectedPersonGroup.PersonGroupId;
+                }
 
                 await FaceService.CreatePersonGroupAsync(Guid.NewGuid().ToString(), GroupToAdd);
                 await (new MessageDialog($"'{GroupToAdd}' successfully added.")).ShowAsync();
@@ -174,12 +178,15 @@ namespace ReceptionKiosk.ViewModels
                 await LoadGroupsAsync();
 
                 //Set the selected group back to the group we had selected before
-                foreach (var group in PersonGroups)
+                if (tempSelectedGroupId != null)
                 {
-                    if (group.PersonGroupId.Equals(tempSelectedGroupId))
+                    foreach (var group in PersonGroups)
                     {
-                        SelectedPersonGroup = group;
-                        break;
+                        if (group.PersonGroupId.Equals(tempSelectedGroupId))
+                        {
+                            SelectedPersonGroup = group;
+                            break;
+                        }
                     }
                 }
 
